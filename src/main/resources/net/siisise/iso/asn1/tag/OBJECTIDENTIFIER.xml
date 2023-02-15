@@ -25,15 +25,25 @@
                 <key oid="113549" name="rsadsi">
                     <key oid="1" name="pkcs">
                         <key oid="1" name="pkcs-1">
-                            <key oid="1" name="RSA Encryption"/>
+                            <key oid="0" name="modules">
+                                <key oid="1" name="pkcs-1"/>
+                            </key>
+                            <key oid="1" name="rsaEncryption"/>
                             <key oid="2" name="md2WithRSAEncryption"/>
                             <key oid="3" name="md4WithRSAEncryption"/>
                             <key oid="4" name="md5WithRSAEncryption"/>
-                            <key oid="5" name="sha-1WithRSAEncryption"/>
+                            <key oid="5" name="sha1WithRSAEncryption"/>
                             <key oid="6" name="rsaOAEPEncryptionSET"/>
                             <key oid="7" name="id-RSAES-OAEP"/>
+                            <key oid="8" name="id-mgf1"/>
+                            <key oid="9" name="id-pSpecified"/>
                             <key oid="10" name="RSASSA-PSS"/>
                             <key oid="11" name="sha256WithRSAEncryption"/>
+                            <key oid="12" name="sha384WithRSAEncryption"/>
+                            <key oid="13" name="sha512WithRSAEncryption"/>
+                            <key oid="14" name="sha224WithRSAEncryption"/>
+                            <key oid="15" name="sha512-224WithRSAEncryption"/>
+                            <key oid="16" name="sha512-256WithRSAEncryption"/>
                         </key>
                         <key oid="5" name="pkcs-5">
                             <key oid="1" name="pbeWithMD2AndDES-CBC"/>
@@ -46,6 +56,7 @@
                             <key oid="13" name="id-PBES2"/>
                             <key oid="14" name="id-PBMAC1"/>
                             <key oid="16" name="modules">
+                                <key oid="1" name="pkcs-5"/>
                                 <key oid="2" name="pkcs5v2-1"/>
                             </key>
                         </key>
@@ -104,8 +115,8 @@
                         </key>
                     </key>
                     <key oid="2" name="digestAlgorithm">
-                        <key oid="2" name="md2"/>
-                        <key oid="5" name="md5"/>
+                        <key oid="2" name="id-md2"/>
+                        <key oid="5" name="id-md5"/>
                         <key oid="7" name="id-hmacWithSHA1"/>
                         <key oid="8" name="id-hmacWithSHA224"/>
                         <key oid="9" name="id-hmacWithSHA256"/>
@@ -205,13 +216,13 @@
                 <key oid="1" name="organization">
                     <key oid="101" name="gov">
                         <key oid="3" name="csor">
-                            <key oid="4" name="nistAlgorithms">
+                            <key oid="4" name="nistalgorithm">
                                 <key oid="1" name="aes">
                                     <key oid="2" name="aes128-CBC-PAD"/>
                                     <key oid="22" name="aes192-CBC-PAD"/>
                                     <key oid="42" name="aes256-CBC-PAD"/>
                                 </key>
-                                <key oid="2" name="hashalgs">
+                                <key oid="2" name="hashAlgs">
                                     <key oid="1" name="sha256"/>
                                     <key oid="2" name="sha384"/>
                                     <key oid="3" name="sha512"/>

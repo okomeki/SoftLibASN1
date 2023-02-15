@@ -73,6 +73,7 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 //                Logger.getLogger(OCTETSTRING.class.getName()).log(Level.SEVERE, null, ex);
 //                System.out.println(ex.getLocalizedMessage());
                 // まだ
+            } catch (java.lang.NullPointerException ex) {
             } catch (IOException ex) {
                 Logger.getLogger(OCTETSTRING.class.getName()).log(Level.SEVERE, null, ex);
             }

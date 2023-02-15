@@ -228,4 +228,11 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         }
         return 0;
     }
+    
+    public boolean equals(Object o) {
+        return o != null && o.getClass() == getClass() &&
+                this.getASN1Class() == ((ASN1Object)o).getASN1Class() &&
+                this.getId() == ((ASN1Object)o).getId() &&
+                this.inefinite == ((ASN1Object)o).inefinite;
+    }
 }

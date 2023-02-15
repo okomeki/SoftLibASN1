@@ -76,8 +76,24 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
         return val;
     }
     
+    public int intValue() {
+        return val.intValue();
+    }
+    
+    public long longValue() {
+        return val.longValue();
+    }
+    
     @Override
     public void setValue( BigInteger v ) {
         val = v;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if ( o == null || !(o instanceof INTEGER) ) {
+            return false;
+        }
+        return ((INTEGER)o).getValue().equals(val);
     }
 }

@@ -22,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.siisise.iso.asn1.tag.INTEGER;
+import net.siisise.iso.asn1.tag.NULL;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -152,6 +154,10 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
             ele.setAttribute("tag", getTag().toString());
         }
         for (ASN1Object obj : list) {
+            if ( obj == null ) {
+//                System.out.println("NULL");
+                obj = new NULL();
+            }
             ele.appendChild(obj.encodeXML(doc));
         }
         if (inefinite) {
@@ -209,7 +215,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getName() + " EOF:" + inefinite + " {");
+        StringBuilder sb = new StringBuilder(getName() + " attrStruct:" + attrStruct +" EOF:" + inefinite + " {");
         for (ASN1Object obj : list) {
             sb.append(plusIndent(obj.toString()));
         }
@@ -287,11 +293,22 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     }
 
     public void add(ASN1Object obj) {
+        if ( obj == null ) {
+            obj = new NULL();
+        }
         list.add(obj);
     }
 
     public void add(int index, ASN1Object obj) {
         list.add(index, obj);
+    }
+    
+    public void add(BigInteger v) {
+        add(new INTEGER(v));
+    }
+
+    public void add(long v) {
+        add(new INTEGER(v));
     }
 
     /**
@@ -341,5 +358,10 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     @Override
     public void setValue(List<ASN1Object> val) {
         list = val;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o) && list.equals(((ASN1Struct)o).list) && attrStruct == ((ASN1Struct)o).attrStruct;
     }
 }

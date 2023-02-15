@@ -15,10 +15,14 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
+import net.siisise.iso.asn1.ASN1Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,6 +39,11 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 
     public BITSTRING() {
         super(ASN1.BITSTRING);
+    }
+    
+    public BITSTRING(byte[] d) {
+        this();
+        data = d;
     }
 
     @Override
@@ -79,8 +88,15 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
      * @return
      */
     public String toString() {
+        try {
+            return "BIT STRING len:" + data.length + " " + ASN1Util.toASN1List(data);
+        } catch (UnsupportedOperationException e) {
+            
+        } catch (IOException ex) {
+            Logger.getLogger(BITSTRING.class.getName()).log(Level.SEVERE, null, ex);
+        }
         BASE64 b64 = new BASE64();
-        return b64.encode(data);
+        return "BIT STRING " + b64.encode(data);
     }
 
     /** 未使用ビット数を考慮しない */

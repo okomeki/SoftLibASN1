@@ -28,7 +28,6 @@ import org.w3c.dom.Element;
 public class ASN1String extends ASN1Object<String> implements ASN1Tag {
 
     private String string;
-//    private byte[] data; // バイト型でも持つ?
 
     public ASN1String( ASN1 id ) {
         super(id);
@@ -111,5 +110,10 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag {
     @Override
     public void setValue( String val ) {
         string = val;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o) && string.equals(((ASN1String)o).string);
     }
 }

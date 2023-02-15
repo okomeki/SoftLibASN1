@@ -68,4 +68,9 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
     public void setValue( Boolean v ) {
         val = v;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o) && ((BOOLEAN)o).val == val;
+    }
 }

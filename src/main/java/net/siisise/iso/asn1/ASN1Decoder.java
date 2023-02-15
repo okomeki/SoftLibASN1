@@ -103,26 +103,26 @@ public class ASN1Decoder {
         ASN1Cls cl = ASN1Cls.valueOf((code >> 6) & 0x03); // 上位2bit
         boolean struct = (code & 0x20) != 0; // 構造化フラグ
         BigInteger tag = readTag(code, in);
-        
+/*        
         switch (cl) {
             case 汎用:
             //    System.out.print("クラス0:汎用 " + Integer.toHexString(code));
                 break;
             case 応用:
-                System.out.print("クラス1:応用");
+                System.out.print("class 1:応用");
                 break;
             case コンテキスト特定:
-                System.out.print("クラス2:コンテキスト特定" + (code & 0x1f));
+                System.out.print("class 2:コンテキスト特定" + (code & 0x1f));
                 break; // タグ番号
             case プライベート:
-                System.out.print("クラス3:プライベート");
+                System.out.print("class 3:プライベート");
                 break;
         }
         if ( cl != ASN1Cls.汎用) {
             System.out.print("data=0x" + Integer.toHexString(code) + " tag=0x" + tag.toString(16) + " ");
         }
-//        System.out.print(" 構造:" + struct);
-        
+        System.out.print(" 構造:" + struct);
+*/        
 
         int inlen = len(in);
         if (inlen < 0 ) {
@@ -130,7 +130,7 @@ public class ASN1Decoder {
         }
         if (code == 0 && inlen == 0) { // 終端コード
 //            System.out.println("しゅうたんA");
-            System.out.println();
+//            System.out.println();
             return null;
         }
 //        System.out.println(" LEN:"+inlen);
@@ -190,12 +190,16 @@ public class ASN1Decoder {
         switch (cl) {
             case 汎用:
                 if (struct) {
-                //    System.out.println("構造" + cl + tag);
-                    object = new ASN1Struct(cl, tag);
+                    object = decodeTag(tag);
+                    if ( object instanceof ASN1Struct ) {
+                        ((ASN1Struct)object).attrStruct = true;
+                    } else {
+                        System.out.println("構造" + cl + tag + struct);
+                    }
+//                    object = new ASN1Struct(cl, tag);
                 } else {
 //                    System.out.println("cl" + cl + "たぐs" + tag);
                     object = decodeTag(tag);
-                    //    System.out.println("たぐe" + tag);
                 }
                 if (object == null) {
                     System.out.println("そのた 0x" + cl + ":" + struct + " tag:" + tag.toString(16) + " len:" + length);
@@ -228,7 +232,6 @@ public class ASN1Decoder {
         }
         object.decodeBody(in, length);
         return object;
-
     }
 
     /**
