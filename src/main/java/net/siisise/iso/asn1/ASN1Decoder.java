@@ -18,10 +18,8 @@ package net.siisise.iso.asn1;
 import java.io.*;
 import java.lang.reflect.Constructor;
 import java.math.BigInteger;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.siisise.io.PEM;
 import net.siisise.iso.asn1.tag.OCTETSTRING;
 
 /**
@@ -284,8 +282,9 @@ public class ASN1Decoder {
     /**
      * PEM
      */
-    private static Map<String,Object> base64Read(String path) throws IOException {
-        return PEM.load("NEW CERTIFICATE REQUEST", path);
-    }
+//    private static Map<String,Object> base64Read(String path) throws IOException {
+//        PEM pem = new PEM("NEW CERTIFICATE REQUEST");
+//        return pem.load( path);
+//    }
 
 }
