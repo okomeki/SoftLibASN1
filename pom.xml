@@ -4,7 +4,7 @@
     <groupId>net.siisise</groupId>
     <artifactId>softlib-asn1</artifactId>
     <name>SoftLibASN1</name>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
     <description>ASN.1 Lib</description>
     <url>https://github.com/okomeki/SoftLib</url>
@@ -45,12 +45,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
+                <version>3.11.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.4.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
