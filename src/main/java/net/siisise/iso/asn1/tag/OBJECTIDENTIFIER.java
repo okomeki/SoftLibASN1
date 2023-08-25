@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.ParserConfigurationException;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -48,6 +49,17 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
      * 名前解決用
      */
     private static OID root = new OID();
+
+    /**
+     *
+     * @param <V>
+     * @param format
+     * @return
+     */
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
     
     static class OID {
         private String oid;
@@ -332,4 +344,6 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
         }
         return false;
     }
+    
+    
 }

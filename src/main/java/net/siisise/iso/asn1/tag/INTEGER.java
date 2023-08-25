@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.tag;
 
 import java.math.BigInteger;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -23,8 +24,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * 際限なく整数
+ * 際限なく符号付き整数
  * JavaではBigIntegerに相当する
+ * DER 頭の9ビットが連続しないこと
  */
 public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
     private BigInteger val;
@@ -58,6 +60,11 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
         Element ele = doc.createElement( ASN1.INTEGER.name() );
         ele.setTextContent(val.toString());
         return ele;
+    }
+    
+    @Override
+    public <T> T encode(TypeFormat<T> format) {
+        return format.numberFormat(val);
     }
 
     @Override
@@ -95,5 +102,13 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
             return false;
         }
         return ((INTEGER)o).getValue().equals(val);
+    }
+    
+    public int compareTo(ASN1Object o) {
+        int i = super.compareTo(o);
+        if ( i == 0 ) {
+            return val.compareTo(((INTEGER)o).getValue());
+        }
+        return i;
     }
 }

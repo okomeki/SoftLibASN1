@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import net.siisise.bind.format.TypeFormat;
+import net.siisise.io.Packet;
+import net.siisise.io.PacketA;
+import net.siisise.lang.Bin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -83,7 +87,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
     }
 
     /**
-     * 
+     * ASN.1 DER encode
      * @return 
      */
     public byte[] encodeAll() {
@@ -93,16 +97,15 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         byte[] body = encodeBody();
 //        System.out.print(" }");
 
-        byte[] lengthField = encodeLength(body.length);
-        byte[] encoded = new byte[tagNo.length + lengthField.length + body.length + (inefinite ? 2 : 0)];
-        System.arraycopy(tagNo, 0, encoded, 0, tagNo.length);
-        System.arraycopy(lengthField, 0, encoded, tagNo.length, lengthField.length);
-        System.arraycopy(body, 0, encoded, tagNo.length + lengthField.length, body.length);
-//        System.out.println(" tagNolen " + tagNo.length + "lengf " + lengthField.length + "body " + body.length);
-        if ( inefinite ) {
-            System.arraycopy( EO, 0, encoded, tagNo.length + lengthField.length + body.length, EO.length );
+        Packet lengthField = encodeLength(body.length);
+        Packet pac = new PacketA();
+        pac.write(tagNo);
+        pac.write(lengthField);
+        pac.write(body);
+        if (inefinite) {
+            pac.write(EO);
         }
-        return encoded;
+        return pac.toByteArray();
     }
 
     private byte[] encodeTagNo() {
@@ -134,44 +137,24 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
     static final byte[] INFLEN = {(byte)0x80};
     static final byte[] EO = {0,0};
 
-    private byte[] encodeLength( int len ) {
-        byte[] lengthField;
+    private Packet encodeLength( int len ) {
+        PacketA pac = new PacketA();
         if ( inefinite ) {
-            return INFLEN;
+            pac.write(INFLEN);
+            return pac;
         }
-        if ( len < 0x80 ) {
-            lengthField = new byte[1];
-            lengthField[0] = (byte) (len & 0x7f);
-        } else if ( len < 0x100 ) {
-            lengthField = new byte[2];
-            lengthField[0] = (byte) 0x81;
-            lengthField[1] = (byte) (len & 0xff);
-        } else if ( len < 0x10000 ) {
-            lengthField = new byte[3];
-            lengthField[0] = (byte) 0x82;
-            lengthField[2] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[1] = (byte) (len & 0xff);
-        } else if ( len < 0x1000000 ) {
-            lengthField = new byte[4];
-            lengthField[0] = (byte) 0x83;
-            lengthField[3] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[2] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[1] = (byte) (len & 0xff);
-        } else {
-            lengthField = new byte[5];
-            lengthField[0] = (byte) 0x84;
-            lengthField[4] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[3] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[2] = (byte) (len & 0xff);
-            len >>= 8;
-            lengthField[1] = (byte) (len & 0xff);
+        pac.write( Bin.toByte(len));
+        int i;
+        do {
+            i = pac.read();
+        } while ( i == 0 && pac.length() > 1 );
+        if ( i > 0 ) {
+            pac.backWrite(i);
         }
-        return lengthField;
+        if ( len >= 0x80 ) {
+            pac.backWrite(0x80 + pac.size());
+        }
+        return pac;
     }
 
     /**
@@ -195,6 +178,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * @param doc
      * @return  */
     abstract public Element encodeXML( Document doc );
+    abstract public <V> V encode(TypeFormat<V> format);
 
     /** データのみ読む
      * @param element */

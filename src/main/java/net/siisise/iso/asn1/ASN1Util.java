@@ -141,6 +141,7 @@ public class ASN1Util {
     public static List<ASN1Object> toASN1List(InputStream in) throws IOException {
         List<ASN1Object> asnobjs = new ArrayList<>();
         while ( in.available() > 0 ) {
+//            System.out.println("available:" + in.available());
             asnobjs.add(ASN1Decoder.toASN1(in));
         }
         return asnobjs;

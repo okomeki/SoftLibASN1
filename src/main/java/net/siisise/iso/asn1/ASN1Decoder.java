@@ -36,9 +36,11 @@ import net.siisise.iso.asn1.tag.OCTETSTRING;
  * RFC 5280 Appendix A.
  *
  * CER/DERは署名のためにBERの曖昧性をいくつか取り除くための制約を設けたもの X.500 DER に対応しているつもり
+ * 
+ * ToDo TypeFormat に変える
  */
 public class ASN1Decoder {
-
+/*
     enum EncodeType {
         BER, // Basic Encoding Rules
         CER, //
@@ -48,43 +50,7 @@ public class ASN1Decoder {
     }
 
     EncodeType encode = EncodeType.DER;
-
-    /**
-     * map にしたい X.690
-     */
-/*    static final Class[] DECODE_CLASSES = {
-        NULL.class, // 0x00 みていぎも使う? // EOCへ変更?
-        BOOLEAN.class, // 0x01
-        INTEGER.class, // 0x02
-        BITSTRING.class, // 0x03
-        OCTETSTRING.class, // 0x04 OCTETSTRING.class,
-        NULL.class, // 0x05
-        OBJECTIDENTIFIER.class, // 0x06
-        null, // 0x07 ObjectDescriptor
-        null, // 0x08 EXTERNAL
-        null, // 0x09 REAL (float)
-        null, // 0x0A ENUMERATED
-        null, // 0x0B EMBEDDED PDV
-        null, // 0x0C UTF8String
-        null, // 0x0D RELATIVE-OID
-        null, null, // (予約)
-        SEQUENCE.class, // 0x10 SEQUENCE and SEQUENCE OF
-        SEQUENCE.class, // 0x11 SET and SET OF
-        null, // 0x12 NumericString
-        ASN1String.class, // 0x13 PrintableString
-        ASN1String.class, // 0x14 TeletexString / T61String
-        null, // 0x15 VideotexString
-        ASN1String.class, // 0x16 IA5String
-        ASN1String.class, // 0x17 UTCTime
-        null, // 0x18 GeneralizedTime
-        null, // 0x19 GraphicString
-        null, // 0x1A VisibleString
-        null, // 0x1B GeneralString
-        null, // 0x1C UniversalString
-        null, // 0x1D CHARACTER STRING
-        ASN1String.class, // 0x1E BMPString
-        null // (予約)
-    }; */
+*/
     /*
      * ASN1Cls へ
      */
@@ -92,7 +58,7 @@ public class ASN1Decoder {
 
     /**
      * デコーダ
-     * @param in
+     * @param in soruce
      * @return 某長さを指定しない終端のときはnull
      * @throws IOException
      */
@@ -210,7 +176,7 @@ public class ASN1Decoder {
             case コンテキスト特定:
             case 応用:
             case プライベート:
-                System.out.println(" 目印 " + tag);
+//                System.out.println(cl.toString() + " 目印 " + tag);
                 /*
              * if (inlen > 0) { tmp = new byte[inlen]; in.read(tmp); if (tmp[0]
              * == 0x30 || (code & 0x20) != 0) { ASN1 asn = new ASN1();

@@ -60,7 +60,7 @@ public enum ASN1 {
     BMPString(0x1e,net.siisise.iso.asn1.tag.ASN1String.class),
     拡張(0x1F,null);
 
-    BigInteger tag;
+    public BigInteger tag;
     Class<? extends ASN1Object> coder;
 
     ASN1(int id, Class<? extends ASN1Object> dc) {
@@ -71,7 +71,7 @@ public enum ASN1 {
     /**
      * タグIDとclassを格納したもの
      * @param id tag ID
-     * @return 
+     * @return 該当タグ
      */
     public static ASN1 valueOf(int id) {
         if (id >= 0x1f) {

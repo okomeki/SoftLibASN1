@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -50,7 +51,7 @@ public class NULL extends ASN1Object implements ASN1Tag {
     public Element encodeXML(Document doc) {
         return doc.createElement( ASN1.valueOf(this.getId()).name() );
     }
-
+    
     @Override
     public void decodeXML(Element element) {
     }
@@ -67,6 +68,11 @@ public class NULL extends ASN1Object implements ASN1Tag {
 
     @Override
     public void setValue( Object val ) {
+    }
+
+    @Override
+    public Object encode(TypeFormat format) {
+        return format.nullFormat();
     }
     
 }

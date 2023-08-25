@@ -18,6 +18,7 @@ package net.siisise.iso.asn1.tag;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
@@ -27,6 +28,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
+ * 末尾の未使用ビット数0-7を最初に記録、本体を記録
  * CER/DER 長さが0のとき 1オクテットの0で符号化しますょ
  */
 public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
@@ -99,16 +101,25 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
         return "BIT STRING " + b64.encode(data);
     }
 
-    /** 未使用ビット数を考慮しない */
+    /**
+     * 未使用ビット数を考慮しない
+     * @return 
+     */
     @Override
     public byte[] getValue() {
         return data;
     }
 
-    /** 未使用ビット数を考慮しない */
+    /** 未使用ビット数を考慮しない
+     * @param val */
     @Override
     public void setValue( byte[] val ) {
         data = val;
         bitlen = data.length * 8;
+    }
+
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

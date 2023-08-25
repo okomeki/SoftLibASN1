@@ -18,6 +18,7 @@ package net.siisise.iso.asn1.tag;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
@@ -107,5 +108,10 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     @Override
     public void setValue( byte[] val ) {
         data = val;
+    }
+
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        return format.byteArrayFormat(data);
     }
 }

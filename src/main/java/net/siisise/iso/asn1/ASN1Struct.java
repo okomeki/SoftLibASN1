@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.tag.INTEGER;
 import net.siisise.iso.asn1.tag.NULL;
 import org.w3c.dom.Document;
@@ -68,6 +69,10 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     public boolean isStruct() {
         return attrStruct;
     }
+    
+    public int size() {
+        return list.size();
+    }
 
     @Override
     public byte[] encodeBody() {
@@ -96,7 +101,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
 
     /**
      *
-     * @param in
+     * @param in source
      * @param length
      * @throws IOException
      */
@@ -167,6 +172,11 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     }
 
     @Override
+    public <V> V encode(TypeFormat<V> format) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
     public void decodeXML(Element xml) {
         String inf = xml.getAttribute("inefinite");
 
@@ -227,7 +237,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      * 特定位置のものを取得する
      *
      * @param offsets
-     * @return
+     * @return 対象オブジェクト
      */
     public ASN1Object get(int... offsets) {
         ASN1Object obj = this;
@@ -247,7 +257,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      * キャストが便利なだけ
      *
      * @param index
-     * @return
+     * @return 対象構造
      */
     public ASN1Struct getStruct(int... index) {
         return (ASN1Struct) get(index);
@@ -258,7 +268,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      *
      * @param tag
      * @param index
-     * @return
+     * @return 対象オブジェクト
      * @see #tagSize( BigInteger )
      */
     public ASN1Object get(BigInteger tag, int index) {
@@ -273,7 +283,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
         return null;
     }
 
-    void set(int index, ASN1Object obj) {
+    public void set(int index, ASN1Object obj) {
         list.set(index, obj);
     }
 
@@ -358,6 +368,13 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     @Override
     public void setValue(List<ASN1Object> val) {
         list = val;
+    }
+    
+    /**
+     * SET の正規化用
+     */
+    public void sort() {
+//        list.sort(c);
     }
     
     @Override

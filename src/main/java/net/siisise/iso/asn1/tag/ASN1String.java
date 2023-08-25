@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.tag;
 
 import java.nio.charset.StandardCharsets;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -31,6 +32,11 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag {
 
     public ASN1String( ASN1 id ) {
         super(id);
+    }
+
+    public ASN1String( ASN1 id, String str ) {
+        super(id);
+        string = str;
     }
 
     @Override
@@ -90,6 +96,11 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag {
         Element ele = doc.createElement( ASN1.valueOf(getId()).toString() );
         ele.setTextContent(string);
         return ele;
+    }
+
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        return format.stringFormat(string);
     }
 
     @Override

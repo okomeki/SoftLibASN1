@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -32,6 +33,10 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
         super(ASN1.BOOLEAN);
     }
 
+    public BOOLEAN(boolean b) {
+        val = b;
+    }
+
     @Override
     public byte[] encodeBody() {
         return new byte[]{ (byte) (val ? 0xff : 0) }; // CER/DER では true は 0xff
@@ -47,6 +52,11 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
         Element bool = doc.createElement( ASN1.BOOLEAN.name() );
         bool.appendChild(doc.createTextNode("" + val));
         return bool;
+    }
+
+    @Override
+    public <T> T encode(TypeFormat<T> f) {
+        return f.booleanFormat(val);
     }
 
     @Override
@@ -68,7 +78,7 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
     public void setValue( Boolean v ) {
         val = v;
     }
-    
+
     @Override
     public boolean equals(Object o) {
         return super.equals(o) && ((BOOLEAN)o).val == val;

@@ -15,12 +15,15 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.util.HashSet;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Struct;
 import net.siisise.iso.asn1.ASN1Tag;
 
 /**
- *
+ * SEQUENCE / SEQUENCE OF / SET / SET OF
+ * SEQUENCE OF / SET OF は単一集合型 同じ型の要素の集合 区別はなさそう
  */
 public class SEQUENCE extends ASN1Struct implements ASN1Tag {
 
@@ -29,12 +32,22 @@ public class SEQUENCE extends ASN1Struct implements ASN1Tag {
     }
 
     // 仮
-    public SEQUENCE SET() {
+    public static SEQUENCE SET() {
         return new SEQUENCE(ASN1.SET);
     }
 
     public SEQUENCE( ASN1 id ) {
         super(id);
+    }
+
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        if ( this.getTag().equals(ASN1.SEQUENCE.tag) ) {
+            return format.listFormat(getValue());
+        } else if ( getTag().equals(ASN1.SET.tag)){
+            return format.setFormat(new HashSet(getValue()));
+        }
+        throw new UnsupportedOperationException();
     }
     
 }
