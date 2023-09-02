@@ -81,20 +81,10 @@ public class ASN1Util {
      */
     public static String toString( Document doc ) throws TransformerException {
         return TrXML.plane(doc);
-/*
-        TransformerFactory tffactory = TransformerFactory.newInstance();
-        //tff.setAttribute("indent-number", "2"); // 依存?
-//        tffactory.setAttribute(TransformerFactoryImpl.INDENT_NUMBER, "2"); // 依存?
-        Transformer transformer = tffactory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.INDENT,"yes");
-        transformer.setOutputProperty(OutputPropertiesFactory.S_KEY_INDENT_AMOUNT, "2");
-        DOMSource src = new DOMSource(doc);
-        StreamResult result = new StreamResult();
-        StringWriter out = new StringWriter();
-        result.setWriter(out);
-        transformer.transform(src, result);
-        return out.toString();
-*/
+    }
+    
+    public static String toXMLString( ASN1Object top) throws ParserConfigurationException, TransformerException {
+        return toString(toXML(top));
     }
     
     /**

@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.tag;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +32,7 @@ import net.siisise.iso.asn1.ASN1Struct;
 /**
  * 比較的簡単なものに対応する
  */
-public class ASN1Convert implements TypeBind<ASN1Object>, BindObject<ASN1Object> {
+public class ASN1Convert implements TypeBind<ASN1Object> {
 
     @Override
     public NULL nullFormat() {
@@ -78,7 +79,7 @@ public class ASN1Convert implements TypeBind<ASN1Object>, BindObject<ASN1Object>
     public ASN1Struct mapFormat(Map map) {
         return collectionFormat(map.values());
     }
-    
+
     /**
      * OCTETSTRING
      * @param bytes
@@ -133,13 +134,14 @@ public class ASN1Convert implements TypeBind<ASN1Object>, BindObject<ASN1Object>
             return listFormat((List)col);
         } else if ( col instanceof Set ) {
             return setFormat((Set)col);
+        } else { // LinkedHashMapのvalues などはCollection
+            return listFormat(new ArrayList(col));
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
-
+/*
     @Override
     public ASN1Object objectFormat(Object obj) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+*/    
 }
