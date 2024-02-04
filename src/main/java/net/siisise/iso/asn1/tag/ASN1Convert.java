@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.siisise.bind.Rebind;
-import net.siisise.bind.format.BindObject;
 import net.siisise.bind.format.TypeBind;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;

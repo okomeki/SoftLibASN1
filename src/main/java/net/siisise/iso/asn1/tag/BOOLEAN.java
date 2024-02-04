@@ -23,7 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- *
+ * 8.2 01 
  */
 public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
 
@@ -37,11 +37,19 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
         val = b;
     }
 
+    /**
+     * 
+     * @return 0xff | 0x00 
+     */
     @Override
     public byte[] encodeBody() {
         return new byte[]{ (byte) (val ? 0xff : 0) }; // CER/DER では true は 0xff
     }
 
+    /**
+     * 
+     * @param data 
+     */
     @Override
     public void decodeBody( byte[] data ) {
         val = data[0] != 0;

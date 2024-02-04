@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
+import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.INTEGER;
 import net.siisise.iso.asn1.tag.NULL;
 import org.w3c.dom.Document;
@@ -92,7 +93,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
         full = new byte[len];
         off = 0;
         for (byte[] data : all) {
-//            System.out.println("cpy len " + data.length );
+//            System.out.println("cpy readLength " + data.length );
             System.arraycopy(data, 0, full, off, data.length);
             off += data.length;
         }
@@ -103,32 +104,32 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      *
      * @param in source
      * @param length
-     * @throws IOException
      */
     @Override
-    public void decodeBody(InputStream in, int length) throws IOException {
+    public void decodeBody(Input in, int length) {
         list.clear();
         if (length >= 0) {
-            byte[] data = new byte[length];
-            in.read(data);
-            InputStream boxIn = new ByteArrayInputStream(data);
-            decodeBody(boxIn);
+            Input data = in.readPacket(length);
+            decodeBody(data);
         } else {
             inefinite = true;
             decodeEOFList(in);
         }
-        //  throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    void decodeBody(InputStream in) throws IOException {
-        while (in.available() > 0) {
+    void decodeBody(Input in) {
+        while (in.size() > 0) {
             ASN1Object o = ASN1Decoder.toASN1(in);
             list.add(o);
         }
     }
 
-    void decodeEOFList(InputStream in) throws IOException {
-        while (in.available() > 0) {
+    /**
+     * 長さ不定 decode.
+     * @param in 
+     */
+    void decodeEOFList(Input in) {
+        while (in.size() > 0) {
             ASN1Object o = ASN1Decoder.toASN1(in);
             if (o == null) {
                 break;

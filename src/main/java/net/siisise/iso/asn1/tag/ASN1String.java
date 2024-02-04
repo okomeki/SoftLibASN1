@@ -82,6 +82,7 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag {
         case VideotexString:
         case VisibleString:
         case UTCTime:
+        case GeneralizedTime:
             return string.getBytes(StandardCharsets.US_ASCII);
         case BMPString:
             return string.getBytes(StandardCharsets.UTF_16BE);

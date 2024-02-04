@@ -16,12 +16,13 @@
 package net.siisise.iso.asn1;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import net.siisise.bind.format.TypeFormat;
+import net.siisise.io.Input;
 import net.siisise.io.Packet;
 import net.siisise.io.PacketA;
+import net.siisise.iso.asn1.syntax.ASN1Syntax;
 import net.siisise.lang.Bin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,6 +34,7 @@ import org.w3c.dom.Element;
  */
 public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> {
 
+    ASN1Syntax syntax;
     private ASN1Cls asn1class = ASN1Cls.汎用;
     private BigInteger tag;
     /** 可変長形式 */
@@ -162,9 +164,8 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * OCTETSTRINGでも struct の場合は ASN1Struct を使うので length が -1 になることはないはず
      * @param in
      * @param length
-     * @throws java.io.IOException
      */
-    public void decodeBody( InputStream in, int length ) throws IOException {
+    public void decodeBody( Input in, int length ) {
         byte[] data = new byte[length];
         in.read(data);
         decodeBody(data);
@@ -213,6 +214,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         return 0;
     }
     
+    @Override
     public boolean equals(Object o) {
         return o != null && o.getClass() == getClass() &&
                 this.getASN1Class() == ((ASN1Object)o).getASN1Class() &&

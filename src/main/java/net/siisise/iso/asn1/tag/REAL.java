@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2022 Siisise Net.
+ * Copyright 2023 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.math.BigDecimal;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
@@ -23,57 +24,47 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * 8.1.5 00 EOC
- * 05 NULL
+ * REAL 浮動小数点
  */
-public class NULL extends ASN1Object implements ASN1Tag {
-
-    public NULL() {
-        super(ASN1.NULL);
-    }
-
-    public NULL( ASN1 id ) {
-        super( id );
+public class REAL extends ASN1Object<BigDecimal> implements ASN1Tag {
+    private BigDecimal val;
+    
+    public REAL() {
+        super( ASN1.REAL);
     }
     
-    @Override
-    public byte[] encodeBody() {
-        return new byte[0];
+    public REAL(BigDecimal v) {
+        val = v;
     }
 
     @Override
-    public void decodeBody(byte[] data) {
-        if ( data.length != 0 ) {
-            throw new java.lang.IllegalStateException();
-        }
+    public BigDecimal getValue() {
+        return val;
+    }
+
+    @Override
+    public void setValue(BigDecimal val) {
+        this.val = val;
+    }
+
+    @Override
+    public byte[] encodeBody() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Element encodeXML(Document doc) {
-        return doc.createElement( ASN1.valueOf(this.getId()).name() );
+        throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     @Override
     public void decodeXML(Element element) {
-    }
-    
-    @Override
-    public String toString() {
-        return ASN1.valueOf(this.getId()).name();
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public Object getValue() {
-        return null;
-    }
-
-    @Override
-    public void setValue( Object val ) {
-    }
-
-    @Override
-    public Object encode(TypeFormat format) {
-        return format.nullFormat();
-    }
-    
 }

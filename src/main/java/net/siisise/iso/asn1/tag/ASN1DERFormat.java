@@ -73,8 +73,8 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     }
     
     byte[] encode(ASN1Object obj) {
-        byte[] tag = encodeTag(obj);
-        byte[] body = obj.encodeBody();
+//        byte[] tag = encodeTag(obj);
+//        byte[] body = obj.encodeBody();
         return obj.encodeAll();
     }
 
