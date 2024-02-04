@@ -16,10 +16,10 @@
 package net.siisise.iso.asn1;
 
 public enum ASN1Cls {
-    汎用(0),
-    応用(1),
-    コンテキスト特定(2),
-    プライベート(3);
+    汎用(0), // Universal
+    応用(1), // Application
+    コンテキスト特定(2), // Context-specific
+    プライベート(3); // Private
 
     byte cls;
 
