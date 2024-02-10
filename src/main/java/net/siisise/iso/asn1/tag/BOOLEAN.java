@@ -38,7 +38,7 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
     }
 
     /**
-     * 
+     * バイト列エンコード.
      * @return 0xff | 0x00 
      */
     @Override
@@ -47,7 +47,7 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
     }
 
     /**
-     * 
+     * バイト列デコード.
      * @param data 
      */
     @Override

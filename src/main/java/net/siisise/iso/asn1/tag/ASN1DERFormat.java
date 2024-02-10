@@ -33,25 +33,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     
     ASN1Convert cnv = new ASN1Convert();
     
-    byte[] encodeTag(ASN1Object obj) {
-        byte[] tagNo;
-        BigInteger tag = obj.getTag();
-        int bitLen = tag.bitLength();
-        if ( bitLen <= 5 ) {
-            tagNo = new byte[1];
-            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | tag.intValue());
-        } else {
-            int len = (bitLen + 6) / 7;
-            tagNo = new byte[len + 1];
-            BigInteger t = tag;
-            for ( int i = 0; i < len; i++ ) {
-                tagNo[i + 1] = (byte) (((i == len - 1) ? 0x80 : 0) | t.shiftRight((len - i - 1) * 7).intValue() & 0x7f);
-            }
-            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | 0x1f);
-        }
-        return tagNo;
-    }
-
+    /**
+     * DERは固定で決まる.
+     * @param len
+     * @return 
+     */
     private Packet encodeLength( int len ) {
         PacketA pac = new PacketA();
 //        if ( inefinite ) {
@@ -72,21 +58,60 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return pac;
     }
     
-    byte[] encode(ASN1Object obj) {
-//        byte[] tag = encodeTag(obj);
-//        byte[] body = obj.encodeBody();
-        return obj.encodeAll();
+    /**
+     * DER Encode.
+     * inefinite 対応は外した
+     * @param obj
+     * @return 
+     */
+    byte[] encodeDER(ASN1Object obj) {
+        byte[] tagNo = encodeTagNo(obj);
+        byte[] body = obj.encodeBody();
+        
+        Packet lengthField = encodeLength(body.length);
+        Packet pac = new PacketA();
+        pac.write(tagNo);
+        pac.write(lengthField);
+        pac.write(body);
+//        if ( obj.infinite) {
+//            pac.write(EO);
+//        }
+        return pac.toByteArray();
+    }
+
+    /**
+     * encode TagNo
+     * @param obj
+     * @return 
+     */
+    byte[] encodeTagNo(ASN1Object obj) {
+        BigInteger tagId = obj.getTag();
+        int bitLen = tagId.bitLength();
+        byte[] tagNo;
+
+        if ( bitLen <= 5 ) {
+            tagNo = new byte[1];
+            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | tagId.intValue());
+        } else {
+            int len = (bitLen + 6) / 7;
+            tagNo = new byte[len + 1];
+            BigInteger t = tagId;
+            for ( int i = 0; i < len; i++ ) {
+                tagNo[i + 1] = (byte) (((i == len - 1) ? 0x80 : 0) | t.shiftRight((len - i - 1) * 7).intValue() & 0x7f);
+            }
+            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | 0x1f);
+        }
+        return tagNo;
     }
 
     @Override
     public byte[] nullFormat() {
-        encode(cnv.nullFormat());
-        return cnv.nullFormat().encodeAll();
+        return encodeDER(cnv.nullFormat());
     }
 
     @Override
     public byte[] booleanFormat(boolean bool) {
-        return cnv.booleanFormat(bool).encodeAll();
+        return encodeDER(cnv.booleanFormat(bool));
     }
 
     /**
@@ -96,17 +121,17 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] numberFormat(Number num) {
-        return cnv.numberFormat(num).encodeAll();
+        return encodeDER(cnv.numberFormat(num));
     }
     
     @Override
     public byte[] byteArrayFormat(byte[] bytes) {
-        return cnv.byteArrayFormat(bytes).encodeAll();
+        return encodeDER(cnv.byteArrayFormat(bytes));
     }
 
     @Override
     public byte[] stringFormat(String str) {
-        return cnv.stringFormat(str).encodeAll();
+        return encodeDER(cnv.stringFormat(str));
     }
 
     /**
@@ -117,12 +142,12 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] mapFormat(Map map) {
-        return cnv.mapFormat(map).encodeAll();
+        return encodeDER(cnv.mapFormat(map));
     }
 
     @Override
     public byte[] listFormat(List list) {
-        return cnv.listFormat(list).encodeAll();
+        return encodeDER(cnv.listFormat(list));
     }
     
     /**
@@ -130,7 +155,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] collectionFormat(Collection col) {
-        return cnv.collectionFormat(col).encodeAll();
+        return encodeDER(cnv.collectionFormat(col));
     }
     
 }

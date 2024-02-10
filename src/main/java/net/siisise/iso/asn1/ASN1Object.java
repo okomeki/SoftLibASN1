@@ -37,7 +37,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
     ASN1Syntax syntax;
     private ASN1Cls asn1class = ASN1Cls.汎用;
     private BigInteger tag;
-    /** 可変長形式 */
+    /** 可変長形式 DERでは未使用 */
     protected boolean inefinite = false;
 
     protected ASN1Object() {
@@ -139,6 +139,11 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
     static final byte[] INFLEN = {(byte)0x80};
     static final byte[] EO = {0,0};
 
+    /**
+     * BER/CER/DER
+     * @param len
+     * @return 
+     */
     private Packet encodeLength( int len ) {
         PacketA pac = new PacketA();
         if ( inefinite ) {
@@ -175,7 +180,8 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         throw new UnsupportedOperationException("Not supported " + getTag() + " yet.");
     }
 
-    /** タグとデータを書き
+    /**
+     * タグとデータを書き
      * @param doc
      * @return  */
     abstract public Element encodeXML( Document doc );

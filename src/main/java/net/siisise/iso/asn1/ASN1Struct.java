@@ -101,7 +101,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     }
 
     /**
-     *
+     * バイト列デコード.
      * @param in source
      * @param length
      */
