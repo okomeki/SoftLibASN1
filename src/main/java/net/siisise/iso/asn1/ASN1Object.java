@@ -99,10 +99,8 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         byte[] body = encodeBody();
 //        System.out.print(" }");
 
-        Packet lengthField = encodeLength(body.length);
-        Packet pac = new PacketA();
-        pac.write(tagNo);
-        pac.write(lengthField);
+        Packet pac = encodeLength(body.length);
+        pac.backWrite(tagNo);
         pac.write(body);
         if (inefinite) {
             pac.write(EO);
