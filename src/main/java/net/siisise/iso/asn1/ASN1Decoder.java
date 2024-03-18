@@ -22,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.io.Input;
 import net.siisise.io.StreamFrontPacket;
-import net.siisise.iso.asn1.tag.OCTETSTRING;
 
 /**
  * ASN.1 のエンコード/デコード.
@@ -157,12 +156,6 @@ public class ASN1Decoder {
              *
                  */
                 object = other(cl, struct, tag);
-                if (struct) {
-                    object = new ASN1Struct(cl, tag);
-                } else {
-//                    object = new OCTETSTRING(); // 仮
-                    throw new java.lang.UnsupportedOperationException("unsupported encoding yet.");
-                }
                 break;
             default:
                 throw new java.lang.UnsupportedOperationException("unsupported encoding yet.");

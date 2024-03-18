@@ -68,10 +68,8 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         byte[] tagNo = encodeTagNo(obj);
         byte[] body = obj.encodeBody();
         
-        Packet lengthField = encodeLength(body.length);
-        Packet pac = new PacketA();
-        pac.write(tagNo);
-        pac.write(lengthField);
+        Packet pac = encodeLength(body.length);
+        pac.backWrite(tagNo);
         pac.write(body);
 //        if ( obj.infinite) {
 //            pac.write(EO);
