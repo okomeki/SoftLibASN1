@@ -73,6 +73,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param obj
      * @return DER
      */
+    @Deprecated
     public byte[] encodeDER(ASN1Object obj) {
         byte[] body = obj.encodeBody();
         return encodeDER(obj, body);

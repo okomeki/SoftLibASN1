@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 okome.
+ * Copyright 2024 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,56 +15,46 @@
  */
 package net.siisise.iso.asn1.tag;
 
-import net.siisise.bind.format.TypeFormat;
-import net.siisise.iso.asn1.ASN1;
-import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.util.Collection;
+import java.util.Map;
+import net.siisise.bind.format.TypeBind;
+import net.siisise.bind.format.TypeFallFormat;
 
 /**
- * X.690 202102
- * 8.5 REAL 実数値.
- * 浮動小数点
- * 2進数 / 16進数 / 10進数
- *
- * @param <T>
+ * RFC 3641
+ * RFC 3642
  */
-public abstract class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
+public class ASN1GSERFormat extends TypeFallFormat<String> implements TypeBind<String> {
 
-    private T val;
-
-    public REAL() {
-        super(ASN1.REAL);
-    }
-
-    public REAL(T v) {
-        super(ASN1.REAL);
-        val = v;
+    @Override
+    public String nullFormat() {
+        return "NULL";
     }
 
     @Override
-    public T getValue() {
-        return val;
+    public String booleanFormat(boolean bool) {
+        return bool ? "TRUE" : "FALSE";
     }
 
     @Override
-    public void setValue(T val) {
-        this.val = val;
-    }
-
-    @Override
-    public Element encodeXML(Document doc) {
+    public String numberFormat(Number num) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
-        return format.numberFormat(val);
+    public String stringFormat(String str) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void decodeXML(Element element) {
+    public String mapFormat(Map map) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    @Override
+    public String collectionFormat(Collection col) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    
 }
