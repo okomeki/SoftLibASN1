@@ -20,6 +20,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
+import net.siisise.io.BigBitPacket;
+import net.siisise.io.BitPacket;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -120,6 +122,8 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 
     @Override
     public <V> V encode(TypeFormat<V> format) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        BitPacket pac = new BigBitPacket();
+        pac.writeBit(data, 0, bitlen);
+        return format.bitArrayFormat(pac);
     }
 }
