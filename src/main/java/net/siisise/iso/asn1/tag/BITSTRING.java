@@ -20,6 +20,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
+import net.siisise.io.BitPacket;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
@@ -30,6 +31,7 @@ import org.w3c.dom.Element;
 /**
  * 末尾の未使用ビット数0-7を最初に記録、本体を記録
  * CER/DER 長さが0のとき 1オクテットの0で符号化しますょ
+ * X.680 3.8.7 bitstring type
  */
 public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 
@@ -42,12 +44,43 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     public BITSTRING() {
         super(ASN1.BITSTRING);
     }
-    
+
+    /**
+     * バイト単位のデータをビット列として.
+     * @param d 
+     */
     public BITSTRING(byte[] d) {
         this();
         data = d;
+        bitlen = data.length * 8L;
     }
 
+    /**
+     * バイト列からビット列
+     * @param d
+     * @param len 
+     */
+    public BITSTRING(byte[] d, long len) {
+        this();
+        data = d;
+        bitlen = len;
+    }
+
+    /**
+     * 
+     * @deprecated ToDo: BigPacket / LittlePacket 注意
+     * @param pac 
+     */
+    public BITSTRING(BitPacket pac) {
+        bitlen = pac.bitLength();
+        data = new byte[(int)((bitlen + 7L) / 8)];
+        pac.readBit(data, 0, bitlen);
+    }
+
+    /**
+     * 
+     * @return 未使用ビット数 + 本体
+     */
     @Override
     public byte[] encodeBody() {
         byte[] out = new byte[data.length + 1];
@@ -56,6 +89,10 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
         return out;
     }
 
+    /**
+     * DER decode
+     * @param data 未使用ビット数 + 本体 
+     */
     @Override
     public void decodeBody( byte[] data ) {
         int 未使用ビット数 = (int) data[0] & 0xff;
@@ -89,6 +126,7 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
      *
      * @return
      */
+    @Override
     public String toString() {
         try {
             return "BIT STRING len:" + data.length + " " + ASN1Util.toASN1List(data);
@@ -110,7 +148,8 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
         return data;
     }
 
-    /** 未使用ビット数を考慮しない
+    /**
+     * 未使用ビット数を考慮しない
      * @param val */
     @Override
     public void setValue( byte[] val ) {

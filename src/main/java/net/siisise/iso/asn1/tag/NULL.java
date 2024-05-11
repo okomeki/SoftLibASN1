@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
+ * X.680 3.8.51 null
  * 8.1.5 00 EOC
  * 05 NULL
  */
@@ -35,12 +36,20 @@ public class NULL extends ASN1Object implements ASN1Tag {
     public NULL( ASN1 id ) {
         super( id );
     }
-    
+
+    /**
+     * 本体なし.
+     * @return DER NULL BODY
+     */
     @Override
     public byte[] encodeBody() {
         return new byte[0];
     }
 
+    /**
+     * 本体なし.
+     * @param data 
+     */
     @Override
     public void decodeBody(byte[] data) {
         if ( data.length != 0 ) {

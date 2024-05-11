@@ -15,7 +15,6 @@
  */
 package net.siisise.iso.asn1.tag;
 
-import java.math.BigDecimal;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
@@ -24,32 +23,34 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * REAL 浮動小数点
+ * X.690 202102
+ * 8.5 REAL 実数値.
+ * 浮動小数点
+ * 2進数 / 16進数 / 10進数
+ *
+ * @param <T>
  */
-public class REAL extends ASN1Object<BigDecimal> implements ASN1Tag {
-    private BigDecimal val;
-    
+public abstract class REAL<T> extends ASN1Object<T> implements ASN1Tag {
+
+    private T val;
+
     public REAL() {
-        super( ASN1.REAL);
+        super(ASN1.REAL);
     }
-    
-    public REAL(BigDecimal v) {
+
+    public REAL(T v) {
+        super(ASN1.REAL);
         val = v;
     }
 
     @Override
-    public BigDecimal getValue() {
+    public T getValue() {
         return val;
     }
 
     @Override
-    public void setValue(BigDecimal val) {
+    public void setValue(T val) {
         this.val = val;
-    }
-
-    @Override
-    public byte[] encodeBody() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -58,13 +59,12 @@ public class REAL extends ASN1Object<BigDecimal> implements ASN1Tag {
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public void decodeXML(Element element) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
+    public <V> V encode(TypeFormat<V> format) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

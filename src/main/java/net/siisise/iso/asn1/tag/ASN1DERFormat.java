@@ -15,19 +15,24 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeBind;
 import net.siisise.bind.format.TypeFallFormat;
+import net.siisise.io.BitPacket;
 import net.siisise.io.Packet;
 import net.siisise.io.PacketA;
+import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.lang.Bin;
 
 /**
- * ASN1Object経由の手抜き版
+ * ASN1Object経由の手抜き版DER
  */
 public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<byte[]> {
     
@@ -35,6 +40,9 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     
     /**
      * DERは固定で決まる.
+     * X.690 202102 8.1.3.
+     * 8.1.3.6. 不定形式はなし
+     * a) 定型
      * @param len
      * @return 
      */
@@ -44,7 +52,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
 //            pac.write(INFLEN);
 //            return pac;
 //        }
-        pac.write( Bin.toByte(len));
+        pac.dwrite( Bin.toByte(len));
         int i;
         do {
             i = pac.read();
@@ -61,18 +69,26 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     /**
      * DER Encode.
      * inefinite 対応は外した
+     * @deprecated DERをASN1Objectから分離予定
      * @param obj
-     * @return 
+     * @return DER
      */
-    byte[] encodeDER(ASN1Object obj) {
-        byte[] tagNo = encodeTagNo(obj);
+    public byte[] encodeDER(ASN1Object obj) {
         byte[] body = obj.encodeBody();
-        
-        Packet lengthField = encodeLength(body.length);
-        Packet pac = new PacketA();
-        pac.write(tagNo);
-        pac.write(lengthField);
+        return encodeDER(obj, body);
+    }
+    
+    /**
+     * ASN1 Object をDER変換する.
+     * @param tagNo tagId 
+     * @param body DER encoded body
+     * @return DER ヘッダつき
+     */
+    byte[] encodeDER(ASN1Object obj, byte[] body) {
+        Packet pac = encodeLength(body.length);
+        pac.dbackWrite(encodeTagNo(obj));
         pac.write(body);
+        // DER infinite なし
 //        if ( obj.infinite) {
 //            pac.write(EO);
 //        }
@@ -104,54 +120,117 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return tagNo;
     }
 
+    /**
+     * NULL
+     * @return DER NULL 
+     */
     @Override
     public byte[] nullFormat() {
-        return encodeDER(cnv.nullFormat());
-    }
-
-    @Override
-    public byte[] booleanFormat(boolean bool) {
-        return encodeDER(cnv.booleanFormat(bool));
+        return encodeDER(new NULL(), new byte[0]);
     }
 
     /**
+     * X.690 202102 8.2.
+     * 0x01
+     * @param bool
+     * @return DER BOOLEAN
+     */
+    @Override
+    public byte[] booleanFormat(boolean bool) {
+        return encodeDER(new BOOLEAN(bool), new byte[]{ (byte) (bool ? 0xff : 0) });
+    }
+
+    /**
+     * X.690 8.3 整数値
+     * 8.5. 実数値
      * INTEGER
      * @param num
-     * @return 
+     * @return DER NUMBER
      */
     @Override
     public byte[] numberFormat(Number num) {
-        return encodeDER(cnv.numberFormat(num));
+        if ( num instanceof Integer || num instanceof Long || num instanceof Short || num instanceof Byte ) {
+            num = BigInteger.valueOf((long)num);
+        }
+        if ( num instanceof BigInteger ) {
+            INTEGER i = (INTEGER) cnv.numberFormat(num);
+            return encodeDER(i, ((BigInteger)num).toByteArray());
+        }
+        if ( num instanceof BigDecimal ) {
+        }
+        ASN1Object obj = cnv.numberFormat(num);
+        return encodeDER(obj);
     }
     
+    /**
+     * OCTETSTRING
+     * @param bytes
+     * @return DER OCTETSTRING
+     */
     @Override
     public byte[] byteArrayFormat(byte[] bytes) {
-        return encodeDER(cnv.byteArrayFormat(bytes));
+        OCTETSTRING oct = new OCTETSTRING(bytes);
+        return encodeDER(oct, bytes);
     }
 
+    /**
+     * X.680 3.8.7 ビット列. (仮)
+     * @param bits
+     * @return DER BITSTRING
+     */
+    @Override
+    public byte[] bitArrayFormat(BitPacket bits) {
+        BITSTRING bit = new BITSTRING(bits);
+        long bitlen = bits.bitLength();
+        bits.backWrite((int)bitlen % 8);
+        bits.writeBit(0, (int)(( -bitlen) & 7));
+        return encodeDER(bit, bits.toByteArray());
+    }
+
+    /**
+     * UTF8String にしてみる
+     * X.680 3.8.9 3.8.10 3.8.11 3.8.12 3.8.13
+     * @param str
+     * @return DER UTF8String
+     */
     @Override
     public byte[] stringFormat(String str) {
-        return encodeDER(cnv.stringFormat(str));
+        ASN1String asn = new ASN1String(ASN1.UTF8String,str);
+        return encodeDER(asn, str.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
      * 並び順が保証されていればSEQUENCEとして使える
      * なければSETとして使える
      * @param map
-     * @return 
+     * @return DER SEQUENCE / SET
      */
     @Override
     public byte[] mapFormat(Map map) {
         return encodeDER(cnv.mapFormat(map));
     }
 
+    /**
+     * SEQUENCE / SEQUENCE OF
+     * @param list
+     * @return DER SEQUENCE / SEQUENCE OF
+     */
     @Override
     public byte[] listFormat(List list) {
         return encodeDER(cnv.listFormat(list));
     }
     
+    Packet list(Collection col) {
+        Packet pac = new PacketA();
+        for ( Object v : col ) {
+            pac.write(Rebind.valueOf(v, this));
+        }
+        return pac;
+    }
+
     /**
      * SEQUENCE
+     * @param col
      */
     @Override
     public byte[] collectionFormat(Collection col) {

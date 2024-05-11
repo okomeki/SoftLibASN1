@@ -23,6 +23,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
+ * X.680 3.8.8 boolean type.
  * 8.2 01 
  */
 public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {

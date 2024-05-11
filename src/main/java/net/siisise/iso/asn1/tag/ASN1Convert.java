@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,12 +45,13 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
     }
 
     /**
-     * INTEGER
+     * INTEGER.
+     * 実数値未対応かな.
      * @param num
      * @return 
      */
     @Override
-    public INTEGER numberFormat(Number num) {
+    public ASN1Object numberFormat(Number num) {
         if ( num instanceof Integer || num instanceof Short || num instanceof Byte ) {
             num = num.longValue();
         }
@@ -58,6 +60,9 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
         }
         if ( num instanceof BigInteger ) {
             return new INTEGER((BigInteger)num);
+        }
+        if ( num instanceof BigDecimal ) {
+            return new BigDecimalREAL((BigDecimal)num);
         }
         throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -121,7 +126,7 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
         }
         return seq;
     }
-
+    
     /**
      * SEQUENCE / SEQUENCE OF / SET / SET OF
      * @param col
