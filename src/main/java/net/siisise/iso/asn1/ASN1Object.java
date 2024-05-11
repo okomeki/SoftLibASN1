@@ -20,10 +20,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
-import net.siisise.io.Packet;
-import net.siisise.io.PacketA;
-import net.siisise.iso.asn1.syntax.ASN1Syntax;
-import net.siisise.lang.Bin;
+import net.siisise.iso.asn1.tag.ASN1DERFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,7 +31,7 @@ import org.w3c.dom.Element;
  */
 public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> {
 
-    ASN1Syntax syntax;
+//    ASN1Syntax syntax;
     private ASN1Cls asn1class = ASN1Cls.汎用;
     private BigInteger tag;
     /** 可変長形式 DERでは未使用 */
@@ -93,76 +90,19 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * @return 
      */
     public byte[] encodeAll() {
-        byte[] tagNo = encodeTagNo();
-
-//        System.out.println("" + getTag() + " {");
-        byte[] body = encodeBody();
-//        System.out.print(" }");
-
-        Packet lengthField = encodeLength(body.length);
-        Packet pac = new PacketA();
-        pac.write(tagNo);
-        pac.write(lengthField);
-        pac.write(body);
-        if (inefinite) {
-            pac.write(EO);
-        }
-        return pac.toByteArray();
-    }
-
-    private byte[] encodeTagNo() {
-        BigInteger tagId = getTag();
-        byte[] tagNo;
-        int bitLen = tagId.bitLength();
-
-        if ( bitLen <= 5 ) {
-            tagNo = new byte[1];
-            tagNo[0] = (byte) ((getASN1Class() << 6) | (isStruct() ? 0x20 : 0) | tagId.intValue());
-        } else {
-            int len = (bitLen + 6) / 7;
-            tagNo = new byte[len + 1];
-            BigInteger t = tagId;
-            for ( int i = 0; i < len; i++ ) {
-                tagNo[i + 1] = (byte) (((i == len - 1) ? 0x80 : 0) | t.shiftRight((len - i - 1) * 7).intValue() & 0x7f);
-            }
-            tagNo[0] = (byte) ((getASN1Class() << 6) | (isStruct() ? 0x20 : 0) | 0x1f);
-        }
-        return tagNo;
+        ASN1DERFormat format = new ASN1DERFormat();
+        return format.encodeDER(this);
     }
 
     /**
+     * DER
      * encodeValue に変える?
-     * @return 
+     * @return DER encoded value
      */
     public abstract byte[] encodeBody();
     
-    static final byte[] INFLEN = {(byte)0x80};
-    static final byte[] EO = {0,0};
-
-    /**
-     * BER/CER/DER
-     * @param len
-     * @return 
-     */
-    private Packet encodeLength( int len ) {
-        PacketA pac = new PacketA();
-        if ( inefinite ) {
-            pac.write(INFLEN);
-            return pac;
-        }
-        pac.write( Bin.toByte(len));
-        int i;
-        do {
-            i = pac.read();
-        } while ( i == 0 && pac.length() > 1 );
-        if ( i > 0 ) {
-            pac.backWrite(i);
-        }
-        if ( len >= 0x80 ) {
-            pac.backWrite(0x80 + pac.size());
-        }
-        return pac;
-    }
+//    static final byte[] INFLEN = {(byte)0x80};
+//    static final byte[] EO = {0,0};
 
     /**
      * デコーダから呼ばれるのみ
