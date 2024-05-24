@@ -46,7 +46,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param len
      * @return 
      */
-    private Packet encodeLength( int len ) {
+    Packet encodeLength( int len ) {
         PacketA pac = new PacketA();
 //        if ( inefinite ) {
 //            pac.write(INFLEN);
@@ -87,13 +87,32 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     byte[] encodeDER(ASN1Object obj, byte[] body) {
         Packet pac = encodeLength(body.length);
-        pac.dbackWrite(encodeTagNo(obj));
+        pac.backWrite(encodeTagNo(obj));
         pac.write(body);
         // DER infinite なし
 //        if ( obj.infinite) {
 //            pac.write(EO);
 //        }
         return pac.toByteArray();
+    }
+    
+    byte[] encodeDER(ASN1 asn1, byte[] body) {
+        Packet pac = encodeLength(body.length);
+        pac.backWrite(encodeTagNo(asn1.tag));
+        pac.write(body);
+        return pac.toByteArray();
+    }
+    
+    /**
+     * class = 0 汎用
+     * struct = false
+     * @param tagId
+     * @return 
+     */
+    byte[] encodeTagNo(BigInteger tagId) {
+        byte[] tagNo = new byte[1];
+        tagNo[0] = (byte)tagId.intValue();
+        return tagNo;
     }
 
     /**
@@ -127,7 +146,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] nullFormat() {
-        return encodeDER(new NULL(), new byte[0]);
+        return encodeDER(ASN1.NULL, new byte[0]);
     }
 
     /**
@@ -138,7 +157,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] booleanFormat(boolean bool) {
-        return encodeDER(new BOOLEAN(bool), new byte[]{ (byte) (bool ? 0xff : 0) });
+        return encodeDER(ASN1.BOOLEAN, new byte[]{ (byte) (bool ? 0xff : 0) });
     }
 
     /**
@@ -157,8 +176,6 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             INTEGER i = (INTEGER) cnv.numberFormat(num);
             return encodeDER(i, ((BigInteger)num).toByteArray());
         }
-        if ( num instanceof BigDecimal ) {
-        }
         ASN1Object obj = cnv.numberFormat(num);
         return encodeDER(obj);
     }
@@ -170,8 +187,8 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] byteArrayFormat(byte[] bytes) {
-        OCTETSTRING oct = new OCTETSTRING(bytes);
-        return encodeDER(oct, bytes);
+//        OCTETSTRING oct = new OCTETSTRING(bytes);
+        return encodeDER(ASN1.OCTETSTRING, bytes);
     }
 
     /**
@@ -181,11 +198,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] bitArrayFormat(BitPacket bits) {
-        BITSTRING bit = new BITSTRING(bits);
+//        BITSTRING bit = new BITSTRING(bits);
         long bitlen = bits.bitLength();
         bits.backWrite((int)bitlen % 8);
         bits.writeBit(0, (int)(( -bitlen) & 7));
-        return encodeDER(bit, bits.toByteArray());
+        return encodeDER(ASN1.BITSTRING, bits.toByteArray());
     }
 
     /**
@@ -196,8 +213,8 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(String str) {
-        ASN1String asn = new ASN1String(ASN1.UTF8String,str);
-        return encodeDER(asn, str.getBytes(StandardCharsets.UTF_8));
+//        ASN1String asn = new ASN1String(ASN1.UTF8String,str);
+        return encodeDER(ASN1.UTF8String, str.getBytes(StandardCharsets.UTF_8));
     }
 
     /**

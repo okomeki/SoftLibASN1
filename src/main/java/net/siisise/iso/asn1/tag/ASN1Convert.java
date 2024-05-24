@@ -61,6 +61,9 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
         if ( num instanceof BigInteger ) {
             return new INTEGER((BigInteger)num);
         }
+        if ( num instanceof Double || num instanceof Float) {
+            return new DoubleREAL((Double)num);
+        }
         if ( num instanceof BigDecimal ) {
             return new BigDecimalREAL((BigDecimal)num);
         }

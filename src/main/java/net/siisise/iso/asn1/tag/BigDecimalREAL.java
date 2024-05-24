@@ -18,6 +18,7 @@ package net.siisise.iso.asn1.tag;
 import java.math.BigDecimal;
 
 /**
+ * 10進数系など.
  * 
  */
 public class BigDecimalREAL extends REAL<BigDecimal> {
@@ -26,8 +27,18 @@ public class BigDecimalREAL extends REAL<BigDecimal> {
         super(v);
     }
 
+    /**
+     * ASN.1符号化.
+     * ISO 6093 のどれか.
+     * 特殊値はない.
+     * @return 
+     */
     @Override
     public byte[] encodeBody() {
+        
+        if ( val.signum() == 0 ) {
+            return new byte[0];
+        }
         throw new UnsupportedOperationException("Not supported yet.");
     }
     

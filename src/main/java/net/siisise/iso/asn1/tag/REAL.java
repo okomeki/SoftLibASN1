@@ -32,7 +32,12 @@ import org.w3c.dom.Element;
  */
 public abstract class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
 
-    private T val;
+    static final byte PLUS_INFINITY = 0x40;
+    static final byte MINUS_INFINITY = 0x41;
+    static final byte NaN = 0x42;
+    static final byte MINUS_ZERO = 0x43;
+
+    protected T val;
 
     public REAL() {
         super(ASN1.REAL);

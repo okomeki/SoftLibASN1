@@ -69,7 +69,7 @@ public enum ASN1 {
     BMPString(0x1e,ASN1String.class),
     拡張(0x1F,null);
 
-    public BigInteger tag;
+    public final BigInteger tag;
     Class<? extends ASN1Object> coder;
 
     ASN1(int id, Class<? extends ASN1Object> dc) {
