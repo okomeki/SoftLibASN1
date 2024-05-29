@@ -93,11 +93,8 @@ public class DoubleREAL extends REAL<Double> {
             pac.write(b0);
             pac.write(exp);
         }
-        // m のINTEGER風符号化
-        ASN1DERFormat df = new ASN1DERFormat();
-        byte[] bm = BigInteger.valueOf(m).toByteArray();
-        pac.write(df.encodeLength(bm.length));
-        pac.write(bm);
+        // m のINTEGER風符号化 長さは残りサイズ
+        pac.write(BigInteger.valueOf(m).toByteArray());
         return pac.toByteArray();
     }
 }
