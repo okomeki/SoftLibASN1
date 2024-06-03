@@ -17,7 +17,8 @@ package net.siisise.iso.asn1.module;
 
 /**
  * ASN.1 Type または Module
+ * 仮
  */
-public class ASN1Module {
+public interface ASN1Module {
     
 }

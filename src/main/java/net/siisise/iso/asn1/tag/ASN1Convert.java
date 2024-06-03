@@ -45,10 +45,9 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
     }
 
     /**
-     * INTEGER.
-     * 実数値未対応かな.
-     * @param num
-     * @return 
+     * 整数をINTEGERに、実数をREALに.
+     * @param num Java型
+     * @return ASN1型 INTEGER または REAL
      */
     @Override
     public ASN1Object numberFormat(Number num) {
@@ -62,10 +61,10 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
             return new INTEGER((BigInteger)num);
         }
         if ( num instanceof Double || num instanceof Float) {
-            return new DoubleREAL((Double)num);
+            return new REAL(num.doubleValue());
         }
         if ( num instanceof BigDecimal ) {
-            return new BigDecimalREAL((BigDecimal)num);
+            return new REAL((BigDecimal)num);
         }
         throw new UnsupportedOperationException("Not supported yet.");
     }
