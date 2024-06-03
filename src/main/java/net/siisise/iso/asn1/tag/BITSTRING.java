@@ -30,9 +30,11 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * 末尾の未使用ビット数0-7を最初に記録、本体を記録
+ * bitstring.
+ * 末尾の未使用ビット数0-7を最初に記録、本体を記録.
  * CER/DER 長さが0のとき 1オクテットの0で符号化しますょ
  * X.680 3.8.7 bitstring type
+ * X.690 8.6
  */
 public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 
@@ -48,7 +50,8 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 
     /**
      * バイト単位のデータをビット列として.
-     * @param d 
+     * bit単位データなし
+     * @param d データ 複製していない.
      */
     public BITSTRING(byte[] d) {
         this();
@@ -57,9 +60,10 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     }
 
     /**
-     * バイト列からビット列
-     * @param d
-     * @param len 
+     * バイト列からビット列.
+     * d全部使っていること.
+     * @param d データ 複製していない.
+     * @param len ビット長(全体)
      */
     public BITSTRING(byte[] d, long len) {
         this();
@@ -68,26 +72,30 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     }
 
     /**
-     * 
-     * @deprecated ToDo: BigPacket / LittlePacket 注意
-     * @param pac 
+     * ビット単位データを詰める.
+     * @param pac ビット列
      */
     @Deprecated
     public BITSTRING(BitPacket pac) {
         bitlen = pac.bitLength();
         data = new byte[(int)((bitlen + 7L) / 8)];
-        pac.readBit(data, 0, bitlen);
+        pac.read(data); // バイト単位のみ
+        int b = (int)(bitlen % 8);
+        if ( b != 0 ) { // BigBitPacket / LittleBitPacket 対応 上位ビットから詰める
+            data[data.length - 1] = (byte)(pac.readInt(b) << (8 - b));
+        }
     }
 
     /**
-     * 
+     * X.690 DER encode.
      * @return 未使用ビット数 + 本体
      */
     @Override
     public byte[] encodeBody() {
-        byte[] out = new byte[data.length + 1];
+        int len = (int) ((bitlen +7l) / 8);
+        byte[] out = new byte[len + 1];
         out[0] = (byte) ((-(bitlen % 8)) & 0x7);
-        System.arraycopy(data, 0, out, 1, data.length);
+        System.arraycopy(data, 0, out, 1, len);
         return out;
     }
 
@@ -97,14 +105,14 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
      */
     @Override
     public void decodeBody( byte[] data ) {
-        int 未使用ビット数 = (int) data[0] & 0xff;
-        data[0] = 0;
+        int unbits = (int) data[0] & 0xff;
+        if ( unbits > 7 ) throw new IllegalStateException();
 
-        bitlen = data.length * 8L - 8 - 未使用ビット数;
-        if ( data.length > 0 ) {
-            this.data = new byte[data.length - 1];
-            System.arraycopy(data, 1, this.data, 0, data.length - 1);
-        }
+        bitlen = data.length * 8L - 8 - unbits;
+        this.data = new byte[data.length - 1];
+        System.arraycopy(data, 1, this.data, 0, data.length - 1);
+        // BER では不要なビットを掃除する
+        this.data[this.data.length - 1] &= 0x100 - ((1<<(unbits)));
     }
 
     @Override

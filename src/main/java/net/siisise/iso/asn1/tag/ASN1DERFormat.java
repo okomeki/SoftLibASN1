@@ -209,16 +209,22 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
 
     /**
      * X.680 3.8.7 ビット列. (仮)
-     *
-     * @param bits
+     * X.690 8.6 bitstring値の符号化.
+     * 末尾はbit8 (上側)から埋める.
+     * @param bits BigBitPacket
      * @return DER BITSTRING
      */
     @Override
     public byte[] bitArrayFormat(BitPacket bits) {
 //        BITSTRING bit = new BITSTRING(bits);
         long bitlen = bits.bitLength();
-        bits.backWrite((int) bitlen % 8);
-        bits.writeBit(0, (int) ((-bitlen) & 7));
+        int nbitlen = (int)(-(bitlen % 8)) & 7;
+        bits.backWrite((int) nbitlen); // 未使用ビット
+        if ( nbitlen > 0 ) { // ビット位置補正とPadding
+            int nbit = bits.backReadInt((int)(bitlen % 8));
+            nbit <<= nbitlen;
+            bits.write(nbit);
+        }
         return encodeDER(ASN1.BITSTRING, bits.toByteArray());
     }
 
