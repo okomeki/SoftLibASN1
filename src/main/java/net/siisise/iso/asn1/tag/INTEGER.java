@@ -104,6 +104,7 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
         return ((INTEGER)o).getValue().equals(val);
     }
     
+    @Override
     public int compareTo(ASN1Object o) {
         int i = super.compareTo(o);
         if ( i == 0 ) {

@@ -353,9 +353,22 @@ public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
         val = (T)new BigDecimal(nr3str);
     }
 
+    /**
+     * XML化.
+     * 独自の形式.
+     * @param doc base document
+     * @return REALのXML値
+     */
     @Override
     public Element encodeXML(Document doc) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Element ele = doc.createElement( ASN1.valueOf(getId()).toString() );
+        if ( val instanceof BigDecimal ) {
+            ele.setAttribute("base", "10");
+        } else {
+            ele.setAttribute("base", "2");
+        }
+        ele.setTextContent(val.toString());
+        return ele;
     }
 
     @Override
@@ -365,6 +378,14 @@ public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
 
     @Override
     public void decodeXML(Element element) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String base = element.getAttribute("base");
+        String text = element.getTextContent();
+        if ( base.equals("10")) {
+            val = (T) new BigDecimal(text);
+        } else if ( base.equals("2")) {
+            val = (T) Double.valueOf(text);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
 }

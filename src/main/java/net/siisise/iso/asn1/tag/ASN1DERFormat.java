@@ -203,7 +203,6 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] byteArrayFormat(byte[] bytes) {
-//        OCTETSTRING oct = new OCTETSTRING(bytes);
         return encodeDER(ASN1.OCTETSTRING, bytes);
     }
 
@@ -237,8 +236,21 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(String str) {
-//        ASN1String asn = new ASN1String(ASN1.UTF8String,str);
         return encodeDER(ASN1.UTF8String, str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * ASN1String で型情報を変換可能にしておく.
+     * @param seq ASN1String または その他のCharSequence
+     * @return 
+     */
+    @Override
+    public byte[] stringFormat(CharSequence seq) {
+        if ( seq instanceof ASN1String ) {
+            return encodeDER(ASN1.valueOf(((ASN1String)seq).getASN1Class()), seq.toString().getBytes(StandardCharsets.UTF_8));
+        } else {
+            return stringFormat(seq.toString());
+        }
     }
 
     /**

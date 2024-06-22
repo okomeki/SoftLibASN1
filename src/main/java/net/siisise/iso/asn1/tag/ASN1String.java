@@ -26,7 +26,7 @@ import org.w3c.dom.Element;
 /**
  * 文字列の共通処理
  */
-public class ASN1String extends ASN1Object<String> implements ASN1Tag {
+public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSequence {
 
     private String string;
 
@@ -127,5 +127,20 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag {
     @Override
     public boolean equals(Object o) {
         return super.equals(o) && string.equals(((ASN1String)o).string);
+    }
+
+    @Override
+    public int length() {
+        return string.length();
+    }
+
+    @Override
+    public char charAt(int index) {
+        return string.charAt(index);
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+        return string.subSequence(start, end);
     }
 }

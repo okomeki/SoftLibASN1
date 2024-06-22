@@ -18,8 +18,8 @@ SoftLibPKI からASN1関連を分けたもの。SoftLibCrypto との依存関係
 
 net.siisise
 softlib-asn1
-1.0.1
+1.0.3
 
-リリース版 1.0.1
+リリース版 1.0.3
 
 次版 1.1.0-SNAPSHOT
