@@ -168,7 +168,7 @@ public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
+    public <V> V rebind(TypeFormat<V> format) {
         BitPacket pac = new BigBitPacket();
         pac.writeBit(data, 0, bitlen);
         return format.bitArrayFormat(pac);

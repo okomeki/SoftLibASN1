@@ -39,6 +39,15 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
         return new NULL();
     }
 
+    /**
+     * BERなどで出てくるかもしれない仮.
+     * @return 
+     */
+    @Override
+    public EndOfContent undefinedFormat() {
+        return new EndOfContent();
+    }
+
     @Override
     public BOOLEAN booleanFormat(boolean bool) {
         return new BOOLEAN(bool);
@@ -72,6 +81,20 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
     @Override
     public ASN1String stringFormat(String str) {
         return new ASN1String(ASN1.UTF8String, str);
+    }
+
+    /**
+     * 特定の型がある場合はあらかじめ指定してもよい.
+     * @param sequence 文字シーケンス全般
+     * @return ASN.1 文字列型のいずれか
+     */
+    @Override
+    public ASN1String stringFormat(CharSequence sequence) {
+        if ( sequence instanceof ASN1String ){
+            return new ASN1String(ASN1.valueOf(((ASN1String)sequence).getId()), ((ASN1String) sequence).getValue());
+        }
+        
+        return stringFormat( sequence.toString());
     }
 
     /**

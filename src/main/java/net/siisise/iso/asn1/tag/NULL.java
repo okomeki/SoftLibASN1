@@ -39,6 +39,7 @@ public class NULL extends ASN1Object implements ASN1Tag {
 
     /**
      * 本体なし.
+     * @deprecated 移行済み
      * @return DER NULL BODY
      */
     @Override
@@ -81,7 +82,7 @@ public class NULL extends ASN1Object implements ASN1Tag {
     }
 
     @Override
-    public Object encode(TypeFormat format) {
+    public Object rebind(TypeFormat format) {
         return format.nullFormat();
     }
     

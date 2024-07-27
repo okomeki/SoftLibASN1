@@ -131,7 +131,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     void decodeEOFList(Input in) {
         while (in.size() > 0) {
             ASN1Object o = ASN1Decoder.toASN1(in);
-            if (o == null) {
+            if (o.getASN1Class() == 0) {
                 break;
             }
             list.add(o);
@@ -142,7 +142,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     public Element encodeXML(Document doc) {
         Element ele;
         ASN1 n2 = ASN1.valueOf(getId());
-        if (getASN1Cls() == ASN1Cls.汎用) {
+        if (getASN1Cls() == ASN1Cls.UNIVERSAL) {
             if (n2 == ASN1.拡張) {
                 ele = doc.createElement("struct");
                 ele.setAttribute("tag", getTag().toString());
@@ -172,9 +172,15 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
         return ele;
     }
 
+    /**
+     * どちらかといえばMap
+     * @param <V>
+     * @param format
+     * @return 
+     */
     @Override
-    public <V> V encode(TypeFormat<V> format) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <V> V rebind(TypeFormat<V> format) {
+        return format.collectionFormat(list);
     }
 
     @Override
@@ -197,7 +203,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     private String getName() {
         ASN1 n = ASN1.valueOf(getId());
         ASN1Cls c = getASN1Cls();
-        if (c != ASN1Cls.汎用 || n == ASN1.拡張) {
+        if (c != ASN1Cls.UNIVERSAL || n == ASN1.拡張) {
             return "c" + c + " " + n.toString() + " struct [" + getTag().toString() + "]";
         } else {
             return n.toString();
@@ -341,6 +347,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      * タグ限定サイズ
      *
      * @param tag
+     * @return 
      */
     public int tagSize(BigInteger tag) {
         int count = 0;
@@ -370,14 +377,7 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
     public void setValue(List<ASN1Object> val) {
         list = val;
     }
-    
-    /**
-     * SET の正規化用
-     */
-    public void sort() {
-//        list.sort(c);
-    }
-    
+
     @Override
     public boolean equals(Object o) {
         return super.equals(o) && list.equals(((ASN1Struct)o).list) && attrStruct == ((ASN1Struct)o).attrStruct;

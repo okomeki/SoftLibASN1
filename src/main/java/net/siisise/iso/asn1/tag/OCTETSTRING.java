@@ -42,6 +42,10 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
         data = d; // コピーしたほうがいい?
     }
 
+    /**
+     * @deprecated 
+     * @return 
+     */
     @Override
     public byte[] encodeBody() {
         return data;
@@ -111,7 +115,7 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
+    public <V> V rebind(TypeFormat<V> format) {
         return format.byteArrayFormat(data);
     }
 }

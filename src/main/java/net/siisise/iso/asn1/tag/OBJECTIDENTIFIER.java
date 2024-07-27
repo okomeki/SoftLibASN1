@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.xml.parsers.ParserConfigurationException;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
@@ -39,9 +40,9 @@ import org.xml.sax.SAXException;
 /**
  * ITU-T Rec.X.690.
  * 文字列、int[]などの型に
- * 
+ *
  */
-public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
+public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag, CharSequence {
 
     private List<String> list = new ArrayList<>();
     private String identifier;
@@ -51,89 +52,107 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
     private static OID root = new OID();
 
     /**
+     * OID がないので仮.
+     * パラメータ付きで形にする方がいいかも
      *
      * @param <V>
      * @param format
      * @return
      */
     @Override
-    public <V> V encode(TypeFormat<V> format) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public <V> V rebind(TypeFormat<V> format) {
+        return format.stringFormat(this);
     }
-    
+
+    @Override
+    public int length() {
+        return identifier.length();
+    }
+
+    @Override
+    public char charAt(int index) {
+        return identifier.charAt(index);
+    }
+
+    @Override
+    public CharSequence subSequence(int start, int end) {
+        return identifier.subSequence(start, end);
+    }
+
     static class OID {
+
         private String oid;
         private String name;
         private Class oidClass;
-        private Map<String,OID> map = new HashMap<>();
+        private Map<String, OID> map = new HashMap<>();
 
         public String getName() {
             return name;
         }
 
-        public void setName( String name ) {
+        public void setName(String name) {
             this.name = name;
         }
-        
+
         public Class getOidClass() {
             return oidClass;
         }
 
-        public Map<String,OID> getMap() {
+        public Map<String, OID> getMap() {
             return map;
         }
 
-        public void setMap( Map<String,OID> map ) {
+        public void setMap(Map<String, OID> map) {
             this.map = map;
         }
-        
+
         OID get(String id) {
             return map.get(id);
         }
-        
+
         void put(OID oid) {
             map.put(oid.oid, oid);
         }
-        
+
         @Override
         public String toString() {
             StringBuilder str = new StringBuilder();
             str.append("<").append(getName()).append(" OID=\"").append(oid).append("\">");
-            for ( String k : map.keySet()) {
-                str.append(k).append(" : ").append( map.get( k ));
+            for (String k : map.keySet()) {
+                str.append(k).append(" : ").append(map.get(k));
             }
             str.append("</").append(name).append(">");
             return str.toString();
         }
     }
-    
+
     static {
-        InputStream  xmlIn = OBJECTIDENTIFIER.class.getResourceAsStream("OBJECTIDENTIFIER.xml");
+        InputStream xmlIn = OBJECTIDENTIFIER.class.getResourceAsStream("OBJECTIDENTIFIER.xml");
         try {
             Document oidNameXml = XMLIO.readXML(xmlIn);
             XElement rootElement = new XElement(oidNameXml.getDocumentElement());
-            setKey( root, rootElement );
-            
-        } catch ( SAXException | ParserConfigurationException | IOException ex ) {
+            setKey(root, rootElement);
+
+        } catch (SAXException | ParserConfigurationException | IOException ex) {
             Logger.getLogger(OBJECTIDENTIFIER.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 xmlIn.close();
-            } catch ( IOException ex ) {
+            } catch (IOException ex) {
                 Logger.getLogger(OBJECTIDENTIFIER.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    private static void setKey( OID key, XElement ele ) {
-        
+    private static void setKey(OID key, XElement ele) {
+
         List<XElement> subKeys = ele.getElements();
-        for ( XElement etag : subKeys ) {
+        for (XElement etag : subKeys) {
             OID newKey = new OID();
             newKey.oid = etag.getAttribute("oid");
             newKey.name = etag.getAttribute("name");
-            key.put( newKey );
-            setKey( newKey, etag );
+            key.put(newKey);
+            setKey(newKey, etag);
         }
     }
 
@@ -143,6 +162,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
 
     /**
      * id 起こし.
+     *
      * @param id ドット区切りid
      */
     public OBJECTIDENTIFIER(String id) {
@@ -154,17 +174,17 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
     public byte[] encodeBody() {
 
         List<byte[]> barray = new ArrayList<>();
-        barray.add(new byte[]{ (byte) (get(0) * 40 + get(1)) });
-        for ( int n = 2; n < list.size(); n++ ) {
+        barray.add(new byte[]{(byte) (get(0) * 40 + get(1))});
+        for (int n = 2; n < list.size(); n++) {
             barray.add(encodeValue(n));
         }
         int len = 0;
-        for ( byte[] d : barray ) {
+        for (byte[] d : barray) {
             len += d.length;
         }
         byte[] dst = new byte[len];
         len = 0;
-        for ( byte[] d : barray ) {
+        for (byte[] d : barray) {
             System.arraycopy(d, 0, dst, len, d.length);
             len += d.length;
         }
@@ -172,13 +192,13 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
         //      throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    byte[] encodeValue( int off ) {
+    byte[] encodeValue(int off) {
         String val = list.get(off);
         BigInteger bigVal = new BigInteger(val);
         byte[] data = new byte[bigVal.bitLength() == 0 ? 1 : ((bigVal.bitLength() + 6) / 7)];
-        for ( int i = 0; i < data.length; i++ ) {
+        for (int i = 0; i < data.length; i++) {
             data[i] = (byte) (bigVal.shiftRight((data.length - i - 1) * 7).intValue() & 0x7F);
-            if ( i < data.length - 1 ) {
+            if (i < data.length - 1) {
                 data[i] |= (byte) 0x80;
             }
         }
@@ -186,7 +206,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
     }
 
     @Override
-    public void decodeBody( byte[] data ) {
+    public void decodeBody(byte[] data) {
         list.clear();
         int z = data[0] & 0xff;
         list.add(Integer.toString(z / 40));
@@ -199,7 +219,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
         int off = 0;
         //   long d;
         BigInteger bi;
-        while ( off < data.length - 1 ) {
+        while (off < data.length - 1) {
             //   d = 0;
             bi = BigInteger.ZERO;
             do {
@@ -209,7 +229,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
                 //        d += data[off] & 0x7f;
                 bi = bi.add(BigInteger.valueOf(data[off] & 0x7f));
 
-            } while ( (data[off] & 0x80) != 0 );
+            } while ((data[off] & 0x80) != 0);
             code.append('.');
             code.append(bi.toString());
             list.add(bi.toString());
@@ -222,20 +242,23 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
     // 仮
     @Override
     public String toString() {
-        return "OID "+getName();
+        return "OID " + getName();
     }
-    
+
     /**
      * ツリー上の名
-     * @return 
+     *
+     * @return
      */
     public String getName() {
         OID key = root;
         StringBuilder name = new StringBuilder();
-        for ( int i = 0; i < list.size(); i++ ) {
-            if ( key != null ) key = key.get( list.get(i) );
+        for (int i = 0; i < list.size(); i++) {
+            if (key != null) {
+                key = key.get(list.get(i));
+            }
             name.append(".");
-            if ( key != null ) {
+            if (key != null) {
                 String kname = key.getName();
                 name.append(kname == null ? "Unknown" : kname);
                 name.append("(").append(key.oid);
@@ -251,9 +274,9 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
 
     private OID getOID() {
         OID key = root;
-        for ( String n : list ) {
+        for (String n : list) {
             OID newID = key.get(n);
-            if ( newID == null ) {
+            if (newID == null) {
                 newID = new OID();
                 newID.oid = n;
                 newID.name = "Unknown" + n;
@@ -263,15 +286,15 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
         }
         return key;
     }
-    
+
     public String getShortName() {
         OID key = root;
         String name = new String();
-        for ( int i = 0; i < list.size(); i++ ) {
-            if ( key != null ) {
-                key = key.get( list.get(i) );
+        for (int i = 0; i < list.size(); i++) {
+            if (key != null) {
+                key = key.get(list.get(i));
             }
-            if ( key != null ) {
+            if (key != null) {
                 name = key.getName();
             } else {
                 name = "Unknown(" + list.get(i) + ")";
@@ -279,8 +302,8 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
         }
         return name;
     }
-    
-    private long get( int index ) {
+
+    private long get(int index) {
         return Long.parseLong(list.get(index));
     }
 
@@ -288,21 +311,22 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
     public String getValue() {
         return identifier;
     }
-    
+
     @Override
-    public void setValue( String id ) {
+    public void setValue(String id) {
         identifier = id;
-        list = Arrays.asList( identifier.split("\\."));
+        list = Arrays.asList(identifier.split("\\."));
     }
-    
+
     /**
      * 差分で作る
+     *
      * @param id 追加枝番号
      * @return 正版
      */
     public OBJECTIDENTIFIER sub(String... id) {
         StringBuilder oid = new StringBuilder(getValue());
-        for ( String i : id ) {
+        for (String i : id) {
             oid.append(".");
             oid.append(i);
         }
@@ -311,39 +335,45 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag {
 
     /**
      * 差分で作る
+     *
      * @param id 追加枝番号
      * @return 正版
      */
     public OBJECTIDENTIFIER sub(long... id) {
         StringBuilder oid = new StringBuilder(getValue());
-        for ( long i : id ) {
+        for (long i : id) {
             oid.append(".");
             oid.append(i);
         }
         return new OBJECTIDENTIFIER(oid.toString());
     }
 
+    public OBJECTIDENTIFIER up() {
+        List<String> sub = list.subList(0, list.size() - 1);
+        String oid = sub.stream().collect(Collectors.joining("."));
+        return new OBJECTIDENTIFIER(oid);
+    }
+
     @Override
-    public Element encodeXML( Document doc ) {
-        Element ele = doc.createElement( ASN1.OBJECTIDENTIFIER.name() );
+    public Element encodeXML(Document doc) {
+        Element ele = doc.createElement(ASN1.OBJECTIDENTIFIER.name());
         ele.setTextContent(identifier);
-        ele.setAttribute("short", getShortName() );
+        ele.setAttribute("short", getShortName());
         return ele;
     }
 
     @Override
-    public void decodeXML( Element ele ) {
-        setValue( ele.getTextContent() );
+    public void decodeXML(Element ele) {
+        setValue(ele.getTextContent());
     }
-    
+
     @Override
     public boolean equals(Object o) {
-        if ( o != null && o instanceof OBJECTIDENTIFIER ) {
+        if (o != null && o instanceof OBJECTIDENTIFIER) {
             OBJECTIDENTIFIER oid = (OBJECTIDENTIFIER) o;
             return oid.identifier.equals(identifier);
         }
         return false;
     }
-    
-    
+
 }

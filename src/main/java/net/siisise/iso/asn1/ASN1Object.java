@@ -32,13 +32,13 @@ import org.w3c.dom.Element;
 public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> {
 
 //    ASN1Syntax syntax;
-    private ASN1Cls asn1class = ASN1Cls.汎用;
+    private ASN1Cls asn1class = ASN1Cls.UNIVERSAL;
     private BigInteger tag;
     /** 可変長形式 DERでは未使用 */
     protected boolean inefinite = false;
 
     protected ASN1Object() {
-        asn1class = ASN1Cls.汎用;
+//        asn1class = ASN1Cls.UNIVERSAL;
     }
 
     /**
@@ -57,7 +57,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
     }
 
     protected ASN1Object( ASN1 tag ) {
-        asn1class = ASN1Cls.汎用;
+        asn1class = ASN1Cls.UNIVERSAL;
         this.tag = tag.tag;
     }
 
@@ -91,12 +91,15 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      */
     public byte[] encodeAll() {
         ASN1DERFormat format = new ASN1DERFormat();
-        return format.encodeDER(this);
+//        return rebind(format);
+        byte[] body = encodeBody();
+        return format.encodeDER(this, body);
     }
 
     /**
-     * DER
-     * encodeValue に変える?
+     * DER encoded body.
+     * 署名などで使用する.
+     * rebind でなんとかしたい
      * @return DER encoded value
      */
     public abstract byte[] encodeBody();
@@ -125,7 +128,14 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * @param doc
      * @return  */
     abstract public Element encodeXML( Document doc );
-    abstract public <V> V encode(TypeFormat<V> format);
+
+    /**
+     * 符号化.
+     * @param <V> 出力型
+     * @param format 書式
+     * @return 変換出力
+     */
+    abstract public <V> V rebind(TypeFormat<V> format);
 
     /** データのみ読む
      * @param element */

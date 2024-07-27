@@ -67,7 +67,7 @@ public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
         super(ASN1.REAL);
         val = (T)(Double)v.doubleValue();
     }
-    
+
     public REAL(BigDecimal v) {
         super(ASN1.REAL);
         val = (T)v;
@@ -281,7 +281,7 @@ public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
         m |= S ? 0x8000000000000000l : 0;
         val = (T)(Double)Double.longBitsToDouble(m);
     }
-    
+
     /**
      * フラグなしバイト列をBigIntegerに.
      * @param x バイト列
@@ -372,7 +372,7 @@ public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
+    public <V> V rebind(TypeFormat<V> format) {
         return format.numberFormat(val);
     }
 

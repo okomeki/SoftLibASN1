@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import net.siisise.iso.asn1.tag.ASN1String;
 import net.siisise.iso.asn1.tag.BITSTRING;
 import net.siisise.iso.asn1.tag.BOOLEAN;
+import net.siisise.iso.asn1.tag.EndOfContent;
 import net.siisise.iso.asn1.tag.INTEGER;
 import net.siisise.iso.asn1.tag.NULL;
 import net.siisise.iso.asn1.tag.OBJECTIDENTIFIER;
@@ -34,9 +35,10 @@ import net.siisise.iso.asn1.tag.SEQUENCE;
  * RFC 5911 5912 未読
  * JIS X 5603
  * デコーダー込み
+ * 名前はXML型に利用する.
  */
 public enum ASN1 {
-    EndOfContent(0,NULL.class),
+    EndOfContent(0,EndOfContent.class),
     BOOLEAN(0x01,BOOLEAN.class),
     INTEGER(0x02,INTEGER.class),
     BITSTRING(0x03,BITSTRING.class),

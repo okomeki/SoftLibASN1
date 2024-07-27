@@ -15,8 +15,13 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeFallFormat;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
@@ -52,30 +57,101 @@ public class ASN1XMLFormat extends TypeFallFormat<Element> {
     }
 
     /**
-     * INTEGER
-     * @param num
-     * @return 
+     * INTEGER / REAL.
+     * 振り分けは仮
+     * @param num 数値
+     * @return XML
      */
     @Override
     public Element numberFormat(Number num) {
-        Element ele = doc.createElement( ASN1.INTEGER.name() );
+        Element ele;
+        if ( num instanceof Double || num instanceof Float || num instanceof BigDecimal ) {
+            ele = doc.createElement(ASN1.REAL.name());
+        } else {
+            ele = doc.createElement(ASN1.INTEGER.name());
+        }
         ele.setTextContent(num.toString());
         return ele;
     }
 
+    /**
+     * デフォルトUTF8String型
+     * @param str 文字列
+     * @return XML UTF8String
+     */
     @Override
     public Element stringFormat(String str) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Element ele = doc.createElement("UTF8String");
+        ele.setTextContent(str);
+        return ele;
     }
 
+    /**
+     * 各種文字列型
+     * @param seq 文字列
+     * @return それっぽい文字列
+     */
+    @Override
+    public Element stringFormat(CharSequence seq) {
+        String eleName;
+        if ( seq instanceof ASN1String) {
+            ASN1String str = (ASN1String)seq;
+            ASN1 asn = ASN1.valueOf(str.getTag().intValue());
+            eleName = asn.name();
+        } else {
+            eleName  = "UTF8String";
+        }
+        Element ele = doc.createElement(eleName);
+        ele.setTextContent(seq.toString());
+        return ele;
+    }
+
+    /**
+     * SEQUENCE / SEQUENCE OF
+     * @param map
+     * @return
+     */
     @Override
     public Element mapFormat(Map map) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Element ele = doc.createElement("SEQUENCE");
+        for ( Map.Entry<?,?> e : ((Map<?,?>)map).entrySet() ) {
+            Element ent = Rebind.valueOf(e.getValue(), this);
+            ent.setAttribute("name", (String)e.getKey());
+            ele.appendChild(ent);
+        }
+        return ele;
     }
 
+    /**
+     * SET / SET OF
+     * @param set これくしょん
+     * @return XML
+     */
+    @Override
+    public Element setFormat(Set set) {
+        Element ele = doc.createElement("SET");
+        for ( Object e : set) {
+            Element ent = Rebind.valueOf(e, this);
+            ele.appendChild(ent);
+        }
+        return ele;
+    }
+
+    /**
+     * SEQUENCE / SEQUENCE OF / SET / SET OF.
+     * なんとなく分ける
+     * @param col 一覧
+     * @return XML
+     */
     @Override
     public Element collectionFormat(Collection col) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if ( col instanceof List ) {
+            return listFormat((List)col);
+        } else if ( col instanceof Set ) {
+            return setFormat((Set)col);
+        } else { // LinkedHashMapのvalues などはCollection
+            return listFormat(new ArrayList(col));
+        }
     }
 
     /**

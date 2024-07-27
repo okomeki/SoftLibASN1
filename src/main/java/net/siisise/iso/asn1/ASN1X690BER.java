@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 okome.
+ * Copyright 2024 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,16 @@ package net.siisise.iso.asn1;
 
 import java.math.BigInteger;
 import net.siisise.block.ReadableBlock;
-import net.siisise.iso.asn1.tag.ASN1DERFormat;
+import net.siisise.iso.asn1.tag.EndOfContent;
 
 /**
- * ITU-T X.690 DER.
- * 新しいデコーダ
+ * ITU-T X.690 BER.
  */
-public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
-
-    public ReadableBlock toDER(ASN1Object obj) {
-        return ReadableBlock.wrap((byte[])obj.rebind(new ASN1DERFormat()));
-//        return ReadableBlock.wrap(Rebind.valueOf(obj, new ASN1DERFormat()));
-    }
+public class ASN1X690BER extends ASN1X690 implements ASN1X690DEC {
 
     /**
-     * DER Decode.
-     * BER/CERもだいたいおなじ.
-     *
+     * BER Decode.
+     * 
      * @param in 入力元
      * @return ASN1Object
      */
@@ -45,14 +38,14 @@ public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
         boolean constructed = (identifier & 0x20) != 0;
         BigInteger tagNumber = readTag(identifier, in);
         long len = readLength(in);
-//        if ( len < 0 && !constructed) { // primitive の不定サイズ 不可 BER
-        if (len < 0) { // primitive の不定サイズ 不可 DER structured の不定形もたぶん不可
+        if ( len < 0 && !constructed) { // primitive の不定サイズ 不可 BER
+//        if (len < 0) { // primitive の不定サイズ 不可 DER structured の不定形もたぶん不可
             throw new java.lang.IllegalStateException("length");
 //            contents = in;
         }
-        ReadableBlock contents = in.readBlock(len);
+        //ReadableBlock contents = in.readBlock(len);
 
-        return decode(identifier, cls, constructed, tagNumber, len, contents);
+        return decode(identifier, cls, constructed, tagNumber, len, in);
     }
 
     /**
@@ -65,9 +58,12 @@ public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
     @Override
     ASN1Struct decodeUniversalStructBody(ASN1Struct struct, long length, ReadableBlock in) {
 //        struct.decodeBody(in);
-
+        
         while ( in.length() > 0) {
             ASN1Object o = decode(in);
+            if ( o instanceof EndOfContent) {
+                break;
+            }
             struct.add(o);
         }
         return struct;

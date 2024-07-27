@@ -16,7 +16,6 @@
 package net.siisise.iso.asn1;
 
 import java.io.*;
-import java.lang.reflect.Constructor;
 import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -55,7 +54,7 @@ public class ASN1Decoder {
     /*
      * ASN1Cls へ
      */
-    // static final String[] 種類 = {"汎用", "応用", "コンテキスト特定", "プライベート"};
+    // static final String[] 種類 = {"UNIVERSAL", "APPLICATION", "コンテキスト特定", "PRIVATE"};
 
     public static ASN1Object toASN1(InputStream in) {
         return toASN1(new StreamFrontPacket(in));
@@ -134,27 +133,19 @@ public class ASN1Decoder {
     /**
      * バイナリからObject に
      *
-     * @param cl クラス 00:Universal(汎用) 01:Application(応用)
-     * 10:Context-specific(コンテキスト特定) 11:Private(プライベート)
+     * @param cl クラス 00:UNIVERSAL(汎用) 01:APPLICATION(応用) 10:Context-specific(コンテキスト特定) 11:PRIVATE(私用)
      * @param struct 構造化フラグ
      * @param tag タグ番号
      */
     static ASN1Object decode(ASN1Cls cl, boolean struct, BigInteger tag, Input in, int length) {
         ASN1Object object;
         switch (cl) {
-            case 汎用: // Universal
+            case UNIVERSAL: // 汎用
                 object = universal(cl, struct, tag, length);
                 break;
-            case コンテキスト特定: // Context-specific
-            case 応用: // Application
-            case プライベート: // Private
-//                System.out.println(cl.toString() + " 目印 " + tag);
-                /*
-             * if (inlen > 0) { tmp = new byte[inlen]; in.read(tmp); if (tmp[0]
-             * == 0x30 || (code & 0x20) != 0) { ASN1 asn = new ASN1();
-             * asn.toASN1(tmp); } }
-             *
-                 */
+            case CONTEXT_SPECIFIC: // Context-specific [2]
+            case APPLICATION: // 応用 [Application 2]
+            case PRIVATE: // 私用
                 object = other(cl, struct, tag);
                 break;
             default:
@@ -165,8 +156,8 @@ public class ASN1Decoder {
     }
 
     /**
-     * 汎用 Universal Object を生成するだけ
-     * @param cl 参考 class
+     * UNIVERSAL Universal Object を生成するだけ
+     * @param cl 参考 class universal 汎用確定済み
      * @param struct 構造?
      * @param tag タグ番号
      * @param length 参考 長さ
@@ -177,7 +168,7 @@ public class ASN1Decoder {
         if (struct) {
             if ( object instanceof ASN1Struct ) {
                 ((ASN1Struct)object).attrStruct = true;
-            } else {
+            } else { // CER 文字列など
                 System.out.println("構造" + cl + tag + struct);
                 throw new UnsupportedOperationException("unsupported Universal Object yet.");
             }
@@ -195,6 +186,22 @@ public class ASN1Decoder {
         return object;
     }
     
+    /**
+     * コンテクスト特定,
+     * APPLICATION (Application) PRIVATE (Private)
+     * 例
+     * VisibleString Length Contents 
+     * 1A             05     "abcde"
+     * 
+     * [2] 0xA2
+     * [Application 3] Length Contents
+     * 0x43             05     "abcde"
+     * 
+     * @param cl
+     * @param struct
+     * @param tag
+     * @return 
+     */
     static ASN1Object other(ASN1Cls cl, boolean struct, BigInteger tag) {
         //Object object;
         if (struct) {
@@ -214,34 +221,18 @@ public class ASN1Decoder {
      */
     static ASN1Object decodeTag(BigInteger tag) {
         int tagid = tag.intValue();
-    //    if ( tagid == 12) {
-    //        System.err.println("ないもの" + tagid);
-    //    }
-            
+
         ASN1 tagAndClass = ASN1.valueOf(tagid);
-    //    if ( tagAndClass == null) {
-    //        System.err.println("ないもの" + tagid);
-    //    }
+        if ( tagAndClass == null ) return null;
         ASN1Object object;
         Class<? extends ASN1Object> decodeClass;
 
-//        if (DECODE_CLASSES.length > tagAndClass.tag.longValue()
-//               && (decodeClass = DECODE_CLASSES[tagAndClass.tag.intValue()]) != null) {
-        if (ASN1.values().length > tagAndClass.tag.longValue()
-                && (decodeClass = ASN1.valueOf(tagAndClass.tag.intValue()).coder) != null) {
-            /*
-             case OBJECTIDENTIFIER: // 0x06
-             Class<? extends ASN1Object> cl;
-             cl = (Class<ASN1Object>) java.lang.Class.forName("net.siisise.iso.asn1.tag." + tagAndClass.toString());
-             object = cl.getConstructor().newInstance();
-             break;
-             */
+        if ((decodeClass = tagAndClass.coder) != null) {
             try {
                 try {
-                    Constructor<? extends ASN1Object> cnst = decodeClass.getConstructor();
-                    object = cnst.newInstance();
-                } catch (NoSuchMethodException e) {
                     object = decodeClass.getConstructor(ASN1.class).newInstance(tagAndClass);
+                } catch (NoSuchMethodException e) {
+                    object = decodeClass.getConstructor().newInstance();
                 }
             } catch (ReflectiveOperationException | IllegalArgumentException | SecurityException ex) {
                 Logger.getLogger(ASN1Decoder.class.getName()).log(Level.SEVERE, null, ex);

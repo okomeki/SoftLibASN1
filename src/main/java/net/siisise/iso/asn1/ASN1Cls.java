@@ -15,11 +15,14 @@
  */
 package net.siisise.iso.asn1;
 
+/**
+ * ASN.1 Class.
+ */
 public enum ASN1Cls {
-    汎用(0), // Universal
-    応用(1), // Application
-    コンテキスト特定(2), // Context-specific
-    プライベート(3); // Private
+    UNIVERSAL(0), // UNIVERSAL Universal
+    APPLICATION(1), // APPLICATION Application 例: [Application 3] 0x43 単体 0x67 SEQUENCE? 
+    CONTEXT_SPECIFIC(2), // コンテキスト特定 Context-specific [2] 0x82 単体 0xA2 SEQUENCE?
+    PRIVATE(3); // 私用 Private
 
     byte cls;
 

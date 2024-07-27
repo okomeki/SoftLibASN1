@@ -67,6 +67,11 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSeque
         System.out.println(" " + string);
     }
 
+    /**
+     * 本文の符号化.
+     * @deprecated #rebind(TypeFormat)
+     * @return 本文基本的にUTF-8
+     */
     @Override
     public byte[] encodeBody() {
         switch ( getId() ) {
@@ -83,7 +88,7 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSeque
         case VisibleString:
         case UTCTime:
         case GeneralizedTime:
-            return string.getBytes(StandardCharsets.US_ASCII);
+            return string.getBytes(StandardCharsets.ISO_8859_1);
         case BMPString:
             return string.getBytes(StandardCharsets.UTF_16BE);
         }
@@ -100,8 +105,8 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSeque
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
-        return format.stringFormat(string);
+    public <V> V rebind(TypeFormat<V> format) {
+        return format.stringFormat(this);
     }
 
     @Override

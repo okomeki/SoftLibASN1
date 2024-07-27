@@ -41,7 +41,7 @@ public class SEQUENCE extends ASN1Struct implements ASN1Tag {
     }
 
     @Override
-    public <V> V encode(TypeFormat<V> format) {
+    public <V> V rebind(TypeFormat<V> format) {
         if ( this.getTag().equals(ASN1.SEQUENCE.tag) ) {
             return format.listFormat(getValue());
         } else if ( getTag().equals(ASN1.SET.tag)){

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 okome.
+ * Copyright 2024 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.siisise.iso.asn1.module;
+package net.siisise.iso.asn1;
 
-import net.siisise.abnf.ABNFReg;
+import net.siisise.block.ReadableBlock;
 
 /**
- * ASN.1 Type または Module
- * 仮
+ * ASN.1 X.690 Decoder 仮組.
  */
-public interface ASN1Module {
-    static ABNFReg REG = new ABNFReg();
+public interface ASN1X690DEC {
+    
+    ASN1Object decode(ReadableBlock block);
     
 }

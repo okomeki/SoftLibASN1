@@ -40,6 +40,7 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
 
     /**
      * バイト列エンコード.
+     * @deprecated rebind 移行
      * @return 0xff | 0x00 
      */
     @Override
@@ -53,6 +54,9 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
      */
     @Override
     public void decodeBody( byte[] data ) {
+        if ( data.length != 1) {
+            throw new IllegalStateException();
+        }
         val = data[0] != 0;
     }
 
@@ -64,7 +68,7 @@ public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
     }
 
     @Override
-    public <T> T encode(TypeFormat<T> f) {
+    public <T> T rebind(TypeFormat<T> f) {
         return f.booleanFormat(val);
     }
 

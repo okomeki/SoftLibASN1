@@ -61,9 +61,15 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
         ele.setTextContent(val.toString());
         return ele;
     }
-    
+
+    /**
+     * 符号化.
+     * @param <T> 出力型
+     * @param format 書式
+     * @return 変換出力
+     */
     @Override
-    public <T> T encode(TypeFormat<T> format) {
+    public <T> T rebind(TypeFormat<T> format) {
         return format.numberFormat(val);
     }
 

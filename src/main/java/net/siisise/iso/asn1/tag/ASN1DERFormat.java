@@ -17,6 +17,7 @@ package net.siisise.iso.asn1.tag;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
@@ -28,15 +29,15 @@ import net.siisise.io.BitPacket;
 import net.siisise.io.Packet;
 import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
+import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.lang.Bin;
 
 /**
- * ASN1Object経由の手抜き版 ITU-T X.690 DER
+ * ITU-T X.690 DER.
+ * ASN1Object経由の手抜き版 
  */
 public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<byte[]> {
-
-    ASN1Convert cnv = new ASN1Convert();
 
     /**
      * DERは固定で決まる
@@ -84,11 +85,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     /**
      * ASN1 Object をDER変換する.
      *
-     * @param tagNo tagId
+     * @param obj
      * @param body DER encoded body
      * @return DER ヘッダつき
      */
-    byte[] encodeDER(ASN1Object obj, byte[] body) {
+    public byte[] encodeDER(ASN1Object obj, byte[] body) {
         Packet pac = encodeLength(body.length);
         pac.backWrite(encodeTagNo(obj));
         pac.write(body);
@@ -99,6 +100,13 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return pac.toByteArray();
     }
 
+    /**
+     * DER をまとめる.
+     * タグ, length, 本体 をまとめる
+     * @param asn1 型 0 ～ 31
+     * @param body DER符号化済み値
+     * @return DER符号化
+     */
     byte[] encodeDER(ASN1 asn1, byte[] body) {
         Packet pac = encodeLength(body.length);
         pac.backWrite(encodeTagNo(asn1.tag));
@@ -110,7 +118,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * class = 0 汎用
      * struct = false
      *
-     * @param tagId
+     * @param tagId 0 ～ 31
      * @return
      */
     byte[] encodeTagNo(BigInteger tagId) {
@@ -130,7 +138,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         int bitLen = tagId.bitLength();
         byte[] tagNo;
 
-        if (bitLen <= 5) {
+        if (bitLen <= 5) { // 0 - 31
             tagNo = new byte[1];
             tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | tagId.intValue());
         } else {
@@ -181,24 +189,116 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             num = BigInteger.valueOf((long) num);
         }
         if (num instanceof BigInteger) {
-            INTEGER i = (INTEGER) cnv.numberFormat(num);
-            return encodeDER(i, ((BigInteger) num).toByteArray());
-        }
-        if (num instanceof BigDecimal ) {
-            REAL r = new REAL((BigDecimal)num);
-            return encodeDER(r);
+            return encodeDER(ASN1.INTEGER, ((BigInteger) num).toByteArray());
+        } else if (num instanceof BigDecimal ) {
+            return encodeDER(ASN1.REAL, encodeDecimalBody((BigDecimal)num));
         } else if (num instanceof Double || num instanceof Float) {
-            REAL r = new REAL((Double)num);
-            return encodeDER(r);
+            return encodeDER(ASN1.REAL, encodeDoubleBody(num.doubleValue()));
         }
-        ASN1Object obj = cnv.numberFormat(num);
-        return encodeDER(obj);
+        throw new UnsupportedOperationException();
+    }
+
+    static final BigInteger TEN = BigInteger.valueOf(10);
+    static final int NR3HEAD = 0x03;
+    
+    public byte[] encodeDecimalBody(BigDecimal val) {
+        
+        if ( val.signum() == 0 ) {
+            return new byte[0];
+        }
+        
+        // unscaledValue * 10^-scale
+        int scale = val.scale(); // + 小数点以下の桁数
+        BigInteger us = val.unscaledValue();
+        while ( us.mod(TEN).compareTo(BigInteger.ZERO) == 0 ) {
+            scale--;
+            us = us.divide(TEN);
+        }
+        StringBuilder m = new StringBuilder();
+        m.append(us.toString());
+        //int nl = n.length();
+        m.append(".E");
+        if ( scale == 0 ) {
+            m.append("+0");
+        } else {
+            m.append(Integer.toString(scale));
+        }
+        
+        Packet pac = new PacketA();
+        pac.write(NR3HEAD); // 0000 0011
+        pac.write(m.toString().getBytes(StandardCharsets.ISO_8859_1));
+        return pac.toByteArray();
+    }
+
+    public static final byte PLUS_INFINITY = 0x40;
+    public static final byte MINUS_INFINITY = 0x41;
+    public static final byte NaN = 0x42;
+    public static final byte MINUS_ZERO = 0x43;
+
+    /**
+     * Double型の精度で IEEE754 format から ASN.1 DER 2進数表記に変換する.
+     * F = 0
+     * @param v
+     * @return ASN.1 REAL型
+     */
+    public byte[] encodeDoubleBody(double v) {
+        long ieee754 = Double.doubleToRawLongBits(v);
+        boolean flag = (ieee754 & 0x8000000000000000l) != 0;
+        int exp = (int) (ieee754 >>> 52) & 0x7ff; // 符号 - * 2^1 を 0x400 的なところにもってくる
+        long m = ieee754 & 0x000fffffffffffffl; // fraction
+        switch (exp) {
+            case 0:
+                // 非正規化 または 0
+                if (m == 0) {
+                    if (flag) {
+                        return new byte[]{MINUS_ZERO};
+                    } else {
+                        return new byte[0];
+                    }
+                }
+                // 非正規化数
+                exp++; // 元の精度に戻すだけ
+                break;
+            case 0x7ff:
+                if (m == 0) { // infinity
+                    if (flag) {
+                        return new byte[]{MINUS_INFINITY};
+                    } else {
+                        return new byte[]{PLUS_INFINITY};
+                    }
+                } else { // NaN
+                    return new byte[]{NaN};
+                }
+            default:
+                m |= 0x0010000000000000l; // 最上位ビットをつける
+                break;
+        }
+        // 指数位置の変換
+        while ( (m & 1) == 0) {
+            m >>>= 1;
+            exp++;
+        }
+        exp -= 52 + 0x3ff; // ビット + 符号
+
+        Packet pac = new PacketA();
+        int b0 = (flag ? 0xc0 : 0x80); // bS0000
+        if (exp < -128 || 127 < exp) { // exp 2バイトコース
+            b0 |= 0x01;
+            pac.write(b0);
+            pac.write(Bin.toByte((short)exp));
+        } else { // 1バイトコース
+            pac.write(b0);
+            pac.write(exp);
+        }
+        // m のINTEGER風符号化 長さは残りサイズ
+        pac.write(BigInteger.valueOf(m).toByteArray());
+        return pac.toByteArray();
     }
 
     /**
      * OCTETSTRING
      *
-     * @param bytes
+     * @param bytes バイト列
      * @return DER OCTETSTRING
      */
     @Override
@@ -231,7 +331,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * UTF8String にしてみる
      * X.680 3.8.9 3.8.10 3.8.11 3.8.12 3.8.13
      *
-     * @param str
+     * @param str string
      * @return DER UTF8String
      */
     @Override
@@ -246,12 +346,27 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(CharSequence seq) {
-        if ( seq instanceof ASN1String ) {
-            return encodeDER(ASN1.valueOf(((ASN1String)seq).getASN1Class()), seq.toString().getBytes(StandardCharsets.UTF_8));
+        if ( seq instanceof OBJECTIDENTIFIER || seq instanceof ASN1String ) {
+            // 汎用
+            ASN1Object<String> v = (ASN1Object)seq;
+            ASN1Cls cls = v.getASN1Cls();
+            BigInteger tag = v.getTag();
+            ASN1 asn = ASN1.valueOf(tag.intValue());
+            
+            String str = v.getValue();
+            Charset enc = StandardCharsets.ISO_8859_1; // US_ASCII または ISO_8859_1
+            if ( asn == ASN1.UTF8String ) {
+                enc = StandardCharsets.UTF_8;
+            } else if ( asn == ASN1.BMPString ) {
+                enc = StandardCharsets.UTF_16BE; // UCS2かもしれない
+            }
+            return encodeDER(asn, str.getBytes(enc));
         } else {
             return stringFormat(seq.toString());
         }
     }
+
+    ASN1Convert cnv = new ASN1Convert();
 
     /**
      * 並び順が保証されていればSEQUENCEとして使える

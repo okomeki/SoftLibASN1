@@ -218,9 +218,24 @@
                         <key oid="3" name="csor">
                             <key oid="4" name="nistalgorithm">
                                 <key oid="1" name="aes">
+                                    <key oid="1" name="aes128-ECB-PAD"/>
                                     <key oid="2" name="aes128-CBC-PAD"/>
+                                    <key oid="3" name="aes128-OFB"/>
+                                    <key oid="4" name="aes128-CFB"/>
+                                    <key oid="6" name="aes128-GCM"/>
+                                    <key oid="7" name="aes128-CCM"/>
+                                    <key oid="21" name="aes192-ECB-PAD"/>
                                     <key oid="22" name="aes192-CBC-PAD"/>
+                                    <key oid="23" name="aes192-OFB"/>
+                                    <key oid="24" name="aes192-CFB"/>
+                                    <key oid="26" name="aes192-GCM"/>
+                                    <key oid="27" name="aes192-CCM"/>
+                                    <key oid="41" name="aes256-ECB-PAD"/>
                                     <key oid="42" name="aes256-CBC-PAD"/>
+                                    <key oid="43" name="aes256-OFB"/>
+                                    <key oid="44" name="aes256-CFB"/>
+                                    <key oid="46" name="aes256-GCM"/>
+                                    <key oid="47" name="aes256-CCM"/>
                                 </key>
                                 <key oid="2" name="hashAlgs">
                                     <key oid="1" name="sha256"/>
