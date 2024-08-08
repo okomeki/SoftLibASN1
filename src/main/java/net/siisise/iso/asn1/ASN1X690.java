@@ -19,10 +19,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
+import net.siisise.block.OverBlock;
 import net.siisise.block.ReadableBlock;
 import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.ASN1Prefixed;
 import net.siisise.iso.asn1.tag.EndOfContent;
+import net.siisise.iso.asn1.tag.OCTETSTRING;
 
 /**
  *
@@ -39,8 +41,8 @@ public abstract class ASN1X690 {
      * @param in 入力可能範囲
      * @return
      */
-    ASN1Object decode(int identifier, ASN1Cls cls, boolean constructed, BigInteger tag, long len, ReadableBlock in) {
-        ASN1Object object;
+    ASN1Tag decode(int identifier, ASN1Cls cls, boolean constructed, BigInteger tag, long len, ReadableBlock in) {
+        ASN1Tag object;
         switch (cls) {
             case UNIVERSAL: // Universal 汎用
                 // body込み?
@@ -62,6 +64,21 @@ public abstract class ASN1X690 {
         return object;
     }
 
+    ReadableBlock subBlock(Input in, long len) {
+        ReadableBlock contents;
+        if ( in instanceof ReadableBlock ) {
+            contents = ((ReadableBlock)in).readBlock(len);
+        } else {
+            OverBlock b = OverBlock.wrap(new byte[(int)len]);
+            in.read(b);
+            contents = b;
+        }
+        if (contents.length() < len) {
+            throw new java.lang.IllegalStateException("length" + len);
+        }
+        return contents;
+    }
+
     /**
      * UNIVERSAL 汎用.
      * @param identifier
@@ -70,14 +87,14 @@ public abstract class ASN1X690 {
      * @param length 解析用 -1 不特定
      * @return
      */
-    ASN1Object universal(ASN1Cls cl, boolean constructed, BigInteger tag, long length, ReadableBlock in) {
-        ASN1Object object = decodeUniversalTag(tag);
+    ASN1Tag universal(ASN1Cls cl, boolean constructed, BigInteger tag, long length, ReadableBlock in) {
+        ASN1Tag object = decodeUniversalTag(tag);
         if (object == null || object instanceof EndOfContent ) {
             throw new UnsupportedOperationException("unsupported " + cl + tag + constructed + length + " encoding yet.");
         }
         if (constructed) {
             if (object instanceof ASN1Struct) {
-                ((ASN1Struct) object).attrStruct = true;
+//                ((ASN1Struct) object).attrStruct = true;
                 return decodeUniversalStructBody((ASN1Struct) object, length, in);
             } else {
                 throw new UnsupportedOperationException("unsupported " + cl + tag + constructed + " encoding yet.");
@@ -96,10 +113,10 @@ public abstract class ASN1X690 {
      * @param tag
      * @return 
      */
-    ASN1Object other(ASN1Cls cls, boolean constructed, BigInteger tag) {
-        ASN1Object object;
+    ASN1Tag other(ASN1Cls cls, boolean constructed, BigInteger tag) {
+        ASN1Tag object;
         if (constructed) { // [2] Type 構造として中に Type を持つ EXPLICIT
-            object = new ASN1Struct(cls, tag);
+            object = new ASN1StructList(cls, tag);
         } else { // [2] IMPLICIT Type で Type を上書きする場合
             object = new ASN1Prefixed(cls, tag); // 仮
         }
@@ -165,17 +182,18 @@ public abstract class ASN1X690 {
      * @param tag 汎用タグの範囲
      * @return 汎用
      */
-    ASN1Object decodeUniversalTag(BigInteger tag) {
+    ASN1Tag decodeUniversalTag(BigInteger tag) {
         ASN1 asn = ASN1.valueOf(tag.intValue());
         if ( asn == null || asn.coder == null ) {
-            return null;
+//            throw new UnsupportedOperationException();
+            return new OCTETSTRING(ASN1Cls.UNIVERSAL,tag);
         }
-        Constructor<? extends ASN1Object>[] constructs = (Constructor<? extends ASN1Object>[]) asn.coder.getConstructors();
+        Constructor<? extends ASN1Tag>[] constructs = (Constructor<? extends ASN1Tag>[]) asn.coder.getConstructors();
         
-        Constructor<? extends ASN1Object> c0 = null;
-        Constructor<? extends ASN1Object> c1 = null;
+        Constructor<? extends ASN1Tag> c0 = null;
+        Constructor<? extends ASN1Tag> c1 = null;
         
-        for ( Constructor<? extends ASN1Object> c : constructs ) {
+        for ( Constructor<? extends ASN1Tag> c : constructs ) {
             Type[] ps = c.getGenericParameterTypes();
             if ( ps.length == 0 ) {
                 c0 = c;
@@ -196,6 +214,6 @@ public abstract class ASN1X690 {
         throw new UnsupportedOperationException();
     }
 
-    abstract ASN1Object decodeUniversalStructBody(ASN1Struct asN1Struct, long length, ReadableBlock in);
+    abstract ASN1Tag decodeUniversalStructBody(ASN1Struct asN1Struct, long length, ReadableBlock in);
 
 }

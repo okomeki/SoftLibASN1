@@ -16,13 +16,14 @@
 package net.siisise.iso.asn1.tag;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
+import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.iso.asn1.ASN1Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,7 +31,7 @@ import org.w3c.dom.Element;
 /**
  * 箱の場合もあるのでその場合はこちらではなく ASN1Struct を使う
  */
-public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
+public class OCTETSTRING extends ASN1Object<byte[]> {
     private byte[] data;
     
     public OCTETSTRING() {
@@ -40,6 +41,15 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
     public OCTETSTRING(byte[] d) {
         super( ASN1.OCTETSTRING );
         data = d; // コピーしたほうがいい?
+    }
+    
+    public OCTETSTRING(ASN1Cls cls, BigInteger tag) {
+        super(cls, tag);
+    }
+
+    public OCTETSTRING(ASN1Cls cls, BigInteger tag, byte[] d) {
+        super(cls, tag);
+        data = d;
     }
 
     /**
@@ -79,6 +89,7 @@ public class OCTETSTRING extends ASN1Object<byte[]> implements ASN1Tag {
 //                System.out.println(ex.getLocalizedMessage());
                 // まだ
             } catch (java.lang.NullPointerException ex) {
+            } catch (java.lang.IllegalStateException ex) {
             } catch (IOException ex) {
                 Logger.getLogger(OCTETSTRING.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -19,14 +19,13 @@ import java.nio.charset.StandardCharsets;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * 文字列の共通処理
  */
-public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSequence {
+public class ASN1String extends ASN1Object<String> implements CharSequence {
 
     private String string;
 
@@ -74,7 +73,7 @@ public class ASN1String extends ASN1Object<String> implements ASN1Tag, CharSeque
      */
     @Override
     public byte[] encodeBody() {
-        switch ( getId() ) {
+        switch ( ASN1.valueOf(getId()) ) {
         case UTF8String:
             return string.getBytes(StandardCharsets.UTF_8);
         case IA5String:

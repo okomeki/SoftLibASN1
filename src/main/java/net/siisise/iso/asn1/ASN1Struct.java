@@ -15,250 +15,33 @@
  */
 package net.siisise.iso.asn1;
 
-import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.siisise.bind.format.TypeFormat;
-import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.INTEGER;
-import net.siisise.iso.asn1.tag.NULL;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * SEQUENCE、SETと標準以外の構造
  *
  */
-public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
-
-    private List<ASN1Object> list = new ArrayList<>();
-
-    /**
-     * falseのときふりをする?
-     */
-    boolean attrStruct = true;
-
-    public ASN1Struct(byte cls, BigInteger id) {
-        super(cls, id);
-    }
-
-    public ASN1Struct(ASN1Cls cls, BigInteger id) {
-        super(cls, id);
-    }
-
-    public ASN1Struct(ASN1Object obj, boolean str) {
-        super(ASN1.valueOf(obj.getId()));
-        attrStruct = str;
-    }
-
-    /**
-     * coder は 0
-     *
-     * @param id
-     */
-    public ASN1Struct(ASN1 id) {
-        super(id);
-    }
+public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
 
     @Override
-    public boolean isStruct() {
-        return attrStruct;
-    }
+    public boolean isStruct();
     
-    public int size() {
-        return list.size();
-    }
+    public boolean isInefinite();
+    public void setInefinite(boolean inefinite);
 
-    @Override
-    public byte[] encodeBody() {
-        byte[][] all = new byte[list.size()][];
-        byte[] full;
-        int off = 0;
-        int len = 0;
+    public int size();
 
-        if (getId() == ASN1.SET.tag.intValue()) {
-            Collections.sort(list);
-        }
-
-        for (ASN1Object object : list) {
-            all[off] = object.encodeAll();
-            len += all[off++].length;
-        }
-        full = new byte[len];
-        off = 0;
-        for (byte[] data : all) {
-//            System.out.println("cpy readLength " + data.length );
-            System.arraycopy(data, 0, full, off, data.length);
-            off += data.length;
-        }
-        return full;
-    }
-
-    /**
-     * バイト列デコード.
-     * @param in source
-     * @param length
-     */
-    @Override
-    public void decodeBody(Input in, int length) {
-        list.clear();
-        if (length >= 0) {
-            Input data = in.readPacket(length);
-            decodeBody(data);
-        } else {
-            inefinite = true;
-            decodeEOFList(in);
-        }
-    }
-
-    void decodeBody(Input in) {
-        while (in.size() > 0) {
-            ASN1Object o = ASN1Decoder.toASN1(in);
-            list.add(o);
-        }
-    }
-
-    /**
-     * 長さ不定 decode.
-     * @param in 
-     */
-    void decodeEOFList(Input in) {
-        while (in.size() > 0) {
-            ASN1Object o = ASN1Decoder.toASN1(in);
-            if (o.getASN1Class() == 0) {
-                break;
-            }
-            list.add(o);
-        }
-    }
-
-    @Override
-    public Element encodeXML(Document doc) {
-        Element ele;
-        ASN1 n2 = ASN1.valueOf(getId());
-        if (getASN1Cls() == ASN1Cls.UNIVERSAL) {
-            if (n2 == ASN1.拡張) {
-                ele = doc.createElement("struct");
-                ele.setAttribute("tag", getTag().toString());
-                throw new UnsupportedOperationException("Not supported yet.");
-            } else {
-                ele = doc.createElement(n2.toString());
-                if (n2 != ASN1.SEQUENCE && n2 != ASN1.SET) {
-                    ele.setAttribute("struct", "" + attrStruct);
-                }
-
-            }
-        } else {
-            ele = doc.createElement("struct");
-            ele.setAttribute("class", Integer.toString(getASN1Class()));
-            ele.setAttribute("tag", getTag().toString());
-        }
-        for (ASN1Object obj : list) {
-            if ( obj == null ) {
-//                System.out.println("NULL");
-                obj = new NULL();
-            }
-            ele.appendChild(obj.encodeXML(doc));
-        }
-        if (inefinite) {
-            ele.setAttribute("inefinite", "true");
-        }
-        return ele;
-    }
-
-    /**
-     * どちらかといえばMap
-     * @param <V>
-     * @param format
-     * @return 
-     */
-    @Override
-    public <V> V rebind(TypeFormat<V> format) {
-        return format.collectionFormat(list);
-    }
-
-    @Override
-    public void decodeXML(Element xml) {
-        String inf = xml.getAttribute("inefinite");
-
-        if (inf != null && Boolean.parseBoolean(inf)) {
-            inefinite = true;
-        }
-        NodeList child = xml.getChildNodes();
-        for (int i = 0; i < child.getLength(); i++) {
-            Node n = child.item(i);
-            if (n instanceof Element) {
-                ASN1Object o = ASN1Util.toASN1((Element) n);
-                list.add(o);
-            }
-        }
-    }
-
-    private String getName() {
-        ASN1 n = ASN1.valueOf(getId());
-        ASN1Cls c = getASN1Cls();
-        if (c != ASN1Cls.UNIVERSAL || n == ASN1.拡張) {
-            return "c" + c + " " + n.toString() + " struct [" + getTag().toString() + "]";
-        } else {
-            return n.toString();
-        }
-    }
-
-    String plusIndent(String base) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new StringReader(base));
-            String line = reader.readLine();
-            while (line != null) {
-                sb.append("\r\n ").append(line);
-                line = reader.readLine();
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(ASN1Struct.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 見やすくするだけ 再エンコード不可
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder(getName() + " attrStruct:" + attrStruct +" EOF:" + inefinite + " {");
-        for (ASN1Object obj : list) {
-            sb.append(plusIndent(obj.toString()));
-        }
-        sb.append("\r\n}");
-        return sb.toString();
-    }
-
+    public ASN1Tag get(int offset);
+    
     /**
      * 特定位置のものを取得する
      *
      * @param offsets
      * @return 対象オブジェクト
      */
-    public ASN1Object get(int... offsets) {
-        ASN1Object obj = this;
-
-        for (int i = 0; i < offsets.length; i++) {
-            if (obj instanceof ASN1Struct) {
-                obj = ((ASN1Struct) obj).list.get(offsets[i]); // listにしないとネストする
-            } else {
-                throw new NullPointerException();
-                //                    return null;
-            }
-        }
-        return obj;
-    }
+    public ASN1Tag get(int... offsets);
 
     /**
      * キャストが便利なだけ
@@ -266,120 +49,39 @@ public class ASN1Struct extends ASN1Object<List<ASN1Object>> {
      * @param index
      * @return 対象構造
      */
-    public ASN1Struct getStruct(int... index) {
+    public default ASN1Struct getStruct(int... index) {
         return (ASN1Struct) get(index);
     }
 
     /**
-     * 同タグでn番目
-     *
-     * @param tag
-     * @param index
-     * @return 対象オブジェクト
-     * @see #tagSize( BigInteger )
+     * UNIVERSAL 限定? 同じタグで n番目.
+     * @param tag タグ
+     * @param index 
+     * @return 
      */
-    public ASN1Object get(BigInteger tag, int index) {
-        for (int n = 0; n < list.size(); n++) {
-            if (list.get(n).getTag().equals(tag)) {
-                index--;
-                if (index < 0) {
-                    return list.get(n);
-                }
-            }
-        }
-        return null;
-    }
-
-    public void set(int index, ASN1Object obj) {
-        list.set(index, obj);
-    }
+    public ASN1Tag get(BigInteger tag, int index);
 
     /**
      * オブジェクトを奥深くに追加/更新する.
      * @param obj
      * @param index 巧妙な位置
      */
-    void set(ASN1Object obj, int... index) {
-        if (index.length > 1) {
-            int[] idx = new int[index.length - 1];
-            System.arraycopy(index, 1, idx, 0, idx.length);
-            getStruct(index[0]).set(obj, idx);
-        } else {
-            list.set(index[0], obj);
-        }
-    }
-
-    public void add(ASN1Object obj) {
-        if ( obj == null ) {
-            obj = new NULL();
-        }
-        list.add(obj);
-    }
-
-    public void add(int index, ASN1Object obj) {
-        list.add(index, obj);
-    }
-    
-    public void add(BigInteger v) {
-        add(new INTEGER(v));
-    }
-
-    public void add(long v) {
-        add(new INTEGER(v));
-    }
+    void set(ASN1Tag obj, int... index);
 
     /**
      * オブジェクトを奥深くに追加する.
      * @param obj
      * @param index 巧妙な位置
      */
-    public void add(ASN1Object obj, int... index) {
-        if (index.length > 1) {
-            int[] idx = new int[index.length - 1];
-            System.arraycopy(index, 1, idx, 0, idx.length);
-            getStruct(index[0]).add(obj, idx);
-        } else {
-            list.add(index[0], obj);
-        }
+    void add(ASN1Tag obj, int... index);
+    boolean add(ASN1Tag obj);
+
+    default void add(BigInteger val) {
+        add(new INTEGER(val));
     }
 
-    /**
-     * タグ限定サイズ
-     *
-     * @param tag
-     * @return 
-     */
-    public int tagSize(BigInteger tag) {
-        int count = 0;
-        for (ASN1Object obj : list) {
-            if (obj.getTag().equals(tag)) {
-                count++;
-            }
-        }
-        return count;
+    default void add(long val) {
+        add(new INTEGER(val));
     }
 
-    /**
-     * 型を変えたい このままでは使わない方がいい
-     *
-     * @return
-     */
-    @Override
-    public List<ASN1Object> getValue() {
-        return list;
-    }
-
-    /**
-     *
-     * @param val
-     */
-    @Override
-    public void setValue(List<ASN1Object> val) {
-        list = val;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o) && list.equals(((ASN1Struct)o).list) && attrStruct == ((ASN1Struct)o).attrStruct;
-    }
 }

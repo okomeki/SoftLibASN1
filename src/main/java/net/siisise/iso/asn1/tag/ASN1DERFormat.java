@@ -31,6 +31,8 @@ import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
+import net.siisise.iso.asn1.ASN1StructMap;
+import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.lang.Bin;
 
 /**
@@ -77,7 +79,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @return DER
      */
     @Deprecated
-    public byte[] encodeDER(ASN1Object obj) {
+    public byte[] encodeDER(ASN1Tag obj) {
         byte[] body = obj.encodeBody();
         return encodeDER(obj, body);
     }
@@ -89,7 +91,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param body DER encoded body
      * @return DER ヘッダつき
      */
-    public byte[] encodeDER(ASN1Object obj, byte[] body) {
+    public byte[] encodeDER(ASN1Tag obj, byte[] body) {
         Packet pac = encodeLength(body.length);
         pac.backWrite(encodeTagNo(obj));
         pac.write(body);
@@ -129,11 +131,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
 
     /**
      * encode TagNo
-     *
+     * class | struct | tag
      * @param obj
      * @return
      */
-    byte[] encodeTagNo(ASN1Object obj) {
+    byte[] encodeTagNo(ASN1Tag obj) {
         BigInteger tagId = obj.getTag();
         int bitLen = tagId.bitLength();
         byte[] tagNo;
@@ -377,7 +379,20 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] mapFormat(Map map) {
-        return encodeDER(cnv.mapFormat(map));
+        ASN1Tag tag = (map instanceof ASN1Tag) ? (ASN1Tag)map : cnv.mapFormat(map);
+        if ( tag instanceof ASN1StructMap ) {
+            return mapFormat((ASN1StructMap)tag);
+        }
+        return encodeDER(tag);
+    }
+    
+    public byte[] mapFormat(ASN1StructMap map) {
+        Packet pac = new PacketA();
+        for ( ASN1Tag o : map.values() ) {
+            byte[] body = o.encodeBody();
+            pac.write(encodeDER(o, body));
+        }
+        return encodeDER(map, pac.toByteArray());
     }
 
     /**

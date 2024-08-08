@@ -16,49 +16,87 @@
 package net.siisise.iso.asn1.tag;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeFormat;
+import net.siisise.io.Input;
 import net.siisise.iso.asn1.ASN1Cls;
-import net.siisise.iso.asn1.ASN1Object;
+import net.siisise.iso.asn1.ASN1StructMap;
+import net.siisise.iso.asn1.ASN1Tag;
+import net.siisise.iso.asn1.ASN1Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
  * 拡張型.
- * [2] などのパターンでSEQUENCE ではない単体のもの
- * IMPLICIT を想定
- * @param <V>
+ * [2] などのパターン
+ * 0 cls
+ * 1 tag
+ * 2 data
+ * cls tagは持ち
+ * IMPLICIT / EXPLICIT
+ * EXPLICIT の場合限定
+ * tag を key としても重複して持ち
+ * data を value として保持
  */
-public class ASN1Prefixed<V> extends ASN1Object<V> {
+public class ASN1Prefixed extends ASN1StructMap {
+    
+    /**
+     * とりあえずEXPLICIT限定
+     */
+    final boolean implicit = false;
+    ASN1Tag base;
 
-    ASN1Object base; // 仮 または ASN1型
-    // 型未定義の場合
-    V data;
-
+    /**
+     * EXPLICIT.
+     * @param cls
+     * @param tag 
+     */
     public ASN1Prefixed(ASN1Cls cls, BigInteger tag) {
         super(cls, tag);
     }
 
-    public ASN1Prefixed(ASN1Cls cls, BigInteger tag, V data) {
+    /**
+     * 
+     * @param cls ASN.1 class
+     * @param tag tag 番号
+     * @param asn 中身
+     */
+    public ASN1Prefixed(ASN1Cls cls, BigInteger tag, ASN1Tag asn) {
         super(cls, tag);
-        this.data = data;
+        put(tag.toString(), asn);
+        base = asn;
     }
 
-    public ASN1Prefixed(ASN1Cls cls, BigInteger tag, ASN1Object asn) {
-        super(cls, tag);
-        this.base = asn;
+    /**
+     * 名前をつけないと CONTEXT-SPECIFIC [1]
+     * @param tag 
+     */
+    public ASN1Prefixed(BigInteger tag) {
+        this(ASN1Cls.CONTEXT_SPECIFIC, tag);
     }
 
-    @Override
-    public V getValue() {
-        return data;
+    /**
+     * Context-Specific [tag] 構造.
+     * @param tag 番号
+     * @param asn 中身
+     */
+    public ASN1Prefixed(BigInteger tag, ASN1Tag asn) {
+        this(ASN1Cls.CONTEXT_SPECIFIC, tag, asn);
     }
 
-    @Override
-    public void setValue(V val) {
-        data = val;
+    public ASN1Prefixed(int tag) {
+        this(BigInteger.valueOf(tag));
+    }
+
+    public ASN1Prefixed(int tag, ASN1Tag asn) {
+        this(BigInteger.valueOf(tag), asn);
+    }
+
+    /**
+     * とりあえずEXPLICIT専用なのでfalse
+     * @return false
+     */
+    public boolean isImplicit() {
+        return implicit;
     }
 
     /**
@@ -67,54 +105,64 @@ public class ASN1Prefixed<V> extends ASN1Object<V> {
      */
     @Override
     public byte[] encodeBody() {
-        if (base != null) {
+        if ( implicit ) { // 未対応
             return base.encodeBody();
-        }
-        return (byte[]) data;
-    }
-
-    @Override
-    public void decodeBody(byte[] data) {
-        if (base != null) {
-            base.decodeBody(data);
         } else {
-            this.data = (V) data;
+            return base.encodeAll();
         }
     }
 
     /**
+     * EXPLICIT
+     * @param data
+     * @param length 
+     */
+    @Override
+    public void decodeBody(Input data, int length) {
+        clear();
+        if ( implicit ) {
+            byte[] d = new byte[length];
+            data.read(d);
+            base = new OCTETSTRING(this.getASN1Cls(), getTag(), d);
+        } else {
+            base = ASN1Util.toASN1(data);
+        }
+        put(tag.toString(),base);
+    }
+
+    /**
      * 変換.
-     * @param <V> 出力型
+     * @param <E> 出力型
      * @param format 変換器
      * @return 
      */
     @Override
-    public <V> V rebind(TypeFormat<V> format) {
-        List seq = new ArrayList();
-        seq.add(base);
-        return Rebind.valueOf(seq, format);
+    public <E> E rebind(TypeFormat<E> format) {
+        return format.mapFormat(this);
     }
 
     @Override
     public Element encodeXML(Document doc) {
-        if ( base != null) {
-            Element ele = base.encodeXML(doc);
-            ASN1Cls cls = getASN1Cls();
-            String name;
-            if ( cls != ASN1Cls.CONTEXT_SPECIFIC ) {
-                name = cls.name() + " " + base.getId();
-            } else {
-                name = "" + base.getId();
-            }
-            ele.setAttribute("IMPLICIT", name);
-            return base.encodeXML(doc);
+        ASN1Tag in = base;
+        Element x;
+        if ( implicit ) { // IMPLICIT
+            x = doc.createElement("IMPLICIT");
+        } else { // EXPLICIT
+            x = doc.createElement("EXPLICIT");
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+        x.setAttribute("class",getASN1Cls().name());
+        x.setAttribute("tag", getTag().toString());
+        x.appendChild(base.encodeXML(doc));
+        return x;
     }
 
     @Override
     public void decodeXML(Element element) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        clear();
+        cls = ASN1Cls.valueOf(element.getAttribute("class"));
+        tag = new BigInteger(element.getAttribute("tag"));
+        base = ASN1Util.toASN1(element);
+        put(tag.toString(), base);
     }
 
 }

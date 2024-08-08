@@ -24,7 +24,6 @@ import net.siisise.io.BigBitPacket;
 import net.siisise.io.BitPacket;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.iso.asn1.ASN1Util;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +35,7 @@ import org.w3c.dom.Element;
  * X.680 3.8.7 bitstring type
  * X.690 8.6
  */
-public class BITSTRING extends ASN1Object<byte[]> implements ASN1Tag {
+public class BITSTRING extends ASN1Object<byte[]> {
 
     private byte[] data;
     /**

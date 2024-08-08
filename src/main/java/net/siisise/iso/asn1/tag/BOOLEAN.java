@@ -18,7 +18,6 @@ package net.siisise.iso.asn1.tag;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -26,7 +25,7 @@ import org.w3c.dom.Element;
  * X.680 3.8.8 boolean type.
  * 8.2 01 
  */
-public class BOOLEAN extends ASN1Object<Boolean> implements ASN1Tag {
+public class BOOLEAN extends ASN1Object<Boolean> {
 
     private boolean val;
 

@@ -17,6 +17,7 @@ package net.siisise.iso.asn1;
 
 import java.math.BigInteger;
 import net.siisise.block.ReadableBlock;
+import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.ASN1DERFormat;
 
 /**
@@ -25,7 +26,7 @@ import net.siisise.iso.asn1.tag.ASN1DERFormat;
  */
 public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
 
-    public ReadableBlock toDER(ASN1Object obj) {
+    public ReadableBlock toDER(ASN1Tag obj) {
         return ReadableBlock.wrap((byte[])obj.rebind(new ASN1DERFormat()));
 //        return ReadableBlock.wrap(Rebind.valueOf(obj, new ASN1DERFormat()));
     }
@@ -38,19 +39,18 @@ public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
      * @return ASN1Object
      */
     @Override
-    public ASN1Object decode(ReadableBlock in) {
+    public ASN1Tag decode(Input in) {
         // BER/CER/DER
         int identifier = (byte) in.read();
         ASN1Cls cls = ASN1Cls.valueOf((identifier >> 6) & 0x03); // 上位2bit
         boolean constructed = (identifier & 0x20) != 0;
         BigInteger tagNumber = readTag(identifier, in);
         long len = readLength(in);
-//        if ( len < 0 && !constructed) { // primitive の不定サイズ 不可 BER
-        if (len < 0) { // primitive の不定サイズ 不可 DER structured の不定形もたぶん不可
+        if (len < 0) { // primitive の不定サイズ 不可 DER structured の不定形も不可
             throw new java.lang.IllegalStateException("length");
 //            contents = in;
         }
-        ReadableBlock contents = in.readBlock(len);
+        ReadableBlock contents = subBlock(in, len);
 
         return decode(identifier, cls, constructed, tagNumber, len, contents);
     }
@@ -67,7 +67,7 @@ public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
 //        struct.decodeBody(in);
 
         while ( in.length() > 0) {
-            ASN1Object o = decode(in);
+            ASN1Tag o = decode(in);
             struct.add(o);
         }
         return struct;

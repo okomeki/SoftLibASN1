@@ -28,11 +28,12 @@ import net.siisise.bind.format.TypeBind;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Struct;
+import net.siisise.iso.asn1.ASN1Tag;
 
 /**
  * 比較的簡単なものに対応する
  */
-public class ASN1Convert implements TypeBind<ASN1Object> {
+public class ASN1Convert implements TypeBind<ASN1Tag> {
 
     @Override
     public NULL nullFormat() {
@@ -106,7 +107,12 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
      */
     @Override
     public ASN1Struct mapFormat(Map map) {
-        return collectionFormat(map.values());
+        SEQUENCEMap seq = new SEQUENCEMap();
+        for ( Map.Entry e : ((Map<?,?>)map).entrySet() ) {
+            seq.put((String)e.getKey(), (ASN1Tag)Rebind.valueOf(e.getValue(),this));
+        }
+        
+        return seq;//collectionFormat(map.values());
     }
 
     /**
@@ -115,7 +121,7 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
      * @return 
      */
     @Override
-    public ASN1Object byteArrayFormat(byte[] bytes) {
+    public OCTETSTRING byteArrayFormat(byte[] bytes) {
         return new OCTETSTRING(bytes);
     }
     
@@ -126,9 +132,9 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
      */
     @Override
     public ASN1Struct setFormat(Set col) {
-        SEQUENCE set = SEQUENCE.SET();
+        SEQUENCEList set = SEQUENCEList.SET();
         for (Object v : col ) {
-            ASN1Object o = Rebind.valueOf(v, this);
+            ASN1Tag o = Rebind.valueOf(v, this);
             set.add(o);
         }
         List list = set.getValue();
@@ -143,10 +149,10 @@ public class ASN1Convert implements TypeBind<ASN1Object> {
      * @return 
      */
     @Override
-    public ASN1Struct listFormat(List col) {
-        SEQUENCE seq = new SEQUENCE();
+    public SEQUENCEList listFormat(List col) {
+        SEQUENCEList seq = new SEQUENCEList();
         for (Object v : col ) {
-            ASN1Object o = Rebind.valueOf(v, this);
+            ASN1Tag o = Rebind.valueOf(v, this);
             seq.add(o);
         }
         return seq;

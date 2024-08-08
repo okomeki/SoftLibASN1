@@ -28,7 +28,7 @@ import org.w3c.dom.Element;
  * JavaではBigIntegerに相当する
  * DER 頭の9ビットが連続しないこと
  */
-public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
+public class INTEGER extends ASN1Object<BigInteger> {
     private BigInteger val;
     
     public INTEGER() {
@@ -111,7 +111,7 @@ public class INTEGER extends ASN1Object<BigInteger> implements ASN1Tag {
     }
     
     @Override
-    public int compareTo(ASN1Object o) {
+    public int compareTo(ASN1Tag o) {
         int i = super.compareTo(o);
         if ( i == 0 ) {
             return val.compareTo(((INTEGER)o).getValue());

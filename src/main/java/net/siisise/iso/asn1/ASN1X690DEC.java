@@ -15,13 +15,13 @@
  */
 package net.siisise.iso.asn1;
 
-import net.siisise.block.ReadableBlock;
+import net.siisise.io.Input;
 
 /**
  * ASN.1 X.690 Decoder 仮組.
  */
 public interface ASN1X690DEC {
     
-    ASN1Object decode(ReadableBlock block);
+    ASN1Tag decode(Input block);
     
 }

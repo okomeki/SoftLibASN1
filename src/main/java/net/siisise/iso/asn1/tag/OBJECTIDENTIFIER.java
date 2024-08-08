@@ -30,7 +30,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.xml.XElement;
 import net.siisise.xml.XMLIO;
 import org.w3c.dom.Document;
@@ -42,7 +41,7 @@ import org.xml.sax.SAXException;
  * 文字列、int[]などの型に
  *
  */
-public class OBJECTIDENTIFIER extends ASN1Object<String> implements ASN1Tag, CharSequence {
+public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence {
 
     private List<String> list = new ArrayList<>();
     private String identifier;

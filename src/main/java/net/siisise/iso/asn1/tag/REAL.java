@@ -27,7 +27,6 @@ import net.siisise.io.Packet;
 import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.lang.Bin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,7 +39,7 @@ import org.w3c.dom.Element;
  *
  * @param <T>
  */
-public class REAL<T extends Number> extends ASN1Object<T> implements ASN1Tag {
+public class REAL<T extends Number> extends ASN1Object<T> {
 
     public static final byte PLUS_INFINITY = 0x40;
     public static final byte MINUS_INFINITY = 0x41;
