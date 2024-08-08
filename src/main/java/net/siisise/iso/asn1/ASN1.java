@@ -25,9 +25,10 @@ import net.siisise.iso.asn1.tag.NULL;
 import net.siisise.iso.asn1.tag.OBJECTIDENTIFIER;
 import net.siisise.iso.asn1.tag.OCTETSTRING;
 import net.siisise.iso.asn1.tag.REAL;
-import net.siisise.iso.asn1.tag.SEQUENCE;
+import net.siisise.iso.asn1.tag.SEQUENCEList;
 
 /**
+ * X.680 8.4 ASN.1 UNIVERSAL class の型.
  * X.208 (1988) → X.680 (1995)
  * 
  * RFC 4049→6019 ASN.1で日付と時刻 とか
@@ -46,20 +47,20 @@ public enum ASN1 {
     NULL(0x05,NULL.class),
     OBJECTIDENTIFIER(0x06,OBJECTIDENTIFIER.class),
     ObjectDescriptor(0x07,null),
-    EXTERNAL(0x08,null),
+    EXTERNAL(0x08,null), // External and Instance-of
     REAL(0x09,REAL.class),
     ENUMERATED(0x0A,null),
     EMBEDDED_POV(0x0B,null), // X.690
     UTF8String(0x0C,ASN1String.class),
     RELATIVE_OID(0x0D,null), // X.690
-    UNDEF_0E(0x0e,null),
-    UNDEF_0F(0x0f,null),
-    SEQUENCE(0x10,SEQUENCE.class),
-    SET(0x11,SEQUENCE.class),
+    UNDEF_0E(0x0e,null), // The time
+    UNDEF_0F(0x0f,null), // 予約済み
+    SEQUENCE(0x10,SEQUENCEList.class), // Sequence / Sequence-of
+    SET(0x11,SEQUENCEList.class), // Set / Set-if
     NumericString(0x12,null),
     PrintableString(0x13,ASN1String.class),
-    TeletexString(0x14,ASN1String.class),
-    VideotexString(0x15,null),
+    TeletexString(0x14,ASN1String.class), // 廃止?
+    VideotexString(0x15,null), // 廃止?
     IA5String(0x16,ASN1String.class),
     UTCTime(0x17,ASN1String.class),
     GeneralizedTime(0x18,ASN1String.class), // 2050年以降
@@ -69,12 +70,17 @@ public enum ASN1 {
     CharacterString(0x1C,null),
     CHARACTER_STRING(0x1d,null), // X.690
     BMPString(0x1e,ASN1String.class),
-    拡張(0x1F,null);
+    DATE(0x1f, null),
+    TIME_OF_DAY(0x20, null),
+    DATE_TIME(0x21, null),
+    DURATION_respectively(0x22,null),
+    OID_IRI(0x23, ASN1String.class),
+    RelativeOID_IRI(0x24, ASN1String.class);
 
     public final BigInteger tag;
-    Class<? extends ASN1Object> coder;
+    Class<? extends ASN1Tag> coder;
 
-    ASN1(int id, Class<? extends ASN1Object> dc) {
+    ASN1(int id, Class<? extends ASN1Tag> dc) {
         tag = BigInteger.valueOf(id);
         coder = dc;
     }
@@ -85,7 +91,7 @@ public enum ASN1 {
      * @return 該当タグ
      */
     public static ASN1 valueOf(int id) {
-        if (id >= 0x1f) {
+        if (id > 0x24) {
             return null;
         }
         return ASN1.values()[id];

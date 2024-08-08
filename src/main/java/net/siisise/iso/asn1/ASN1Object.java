@@ -18,6 +18,7 @@ package net.siisise.iso.asn1;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.Arrays;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.ASN1DERFormat;
@@ -29,10 +30,10 @@ import org.w3c.dom.Element;
  *
  * @param <T>
  */
-public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> {
+public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
 //    ASN1Syntax syntax;
-    private ASN1Cls asn1class = ASN1Cls.UNIVERSAL;
+    private ASN1Cls asn1class;// = ASN1Cls.UNIVERSAL;
     private BigInteger tag;
     /** 可変長形式 DERでは未使用 */
     protected boolean inefinite = false;
@@ -61,20 +62,23 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
         this.tag = tag.tag;
     }
 
+    @Override
     public int getASN1Class() {
         return asn1class.cls;
     }
     
+    @Override
     public ASN1Cls getASN1Cls() {
         return asn1class;
     }
 
+    @Override
     public boolean isStruct() {
         return false;
     }
     
-    abstract public T getValue();
-    abstract public void setValue(T val);
+//    abstract public T getValue();
+//    abstract public void setValue(T val);
 
     /**
      * ヘッダ書き込みで前後するのであまり使えない
@@ -89,6 +93,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * ASN.1 DER encode
      * @return 
      */
+    @Override
     public byte[] encodeAll() {
         ASN1DERFormat format = new ASN1DERFormat();
 //        return rebind(format);
@@ -102,6 +107,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * rebind でなんとかしたい
      * @return DER encoded value
      */
+    @Override
     public abstract byte[] encodeBody();
     
 //    static final byte[] INFLEN = {(byte)0x80};
@@ -113,6 +119,7 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * @param in
      * @param length
      */
+    @Override
     public void decodeBody( Input in, int length ) {
         byte[] data = new byte[length];
         in.read(data);
@@ -127,7 +134,13 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      * タグとデータを書き
      * @param doc
      * @return  */
+    @Override
     abstract public Element encodeXML( Document doc );
+
+    /** データのみ読む
+     * @param element */
+    @Override
+    abstract public void decodeXML( Element element );
 
     /**
      * 符号化.
@@ -137,37 +150,32 @@ public abstract class ASN1Object<T> implements java.lang.Comparable<ASN1Object> 
      */
     abstract public <V> V rebind(TypeFormat<V> format);
 
-    /** データのみ読む
-     * @param element */
-    abstract public void decodeXML( Element element );
-
     /**
      * コンストラクタで指定するかオーバーライドするかどちらか
      * @return 
      */
+    @Override
     public int getId() {
         return tag.intValue();
     }
 
+    @Override
     public BigInteger getTag() {
         if ( tag == null ) {
             return BigInteger.valueOf(getId());
         }
         return tag;
     }
-    
+
     @Override
-    public int compareTo( ASN1Object o ) {
-        if ( getASN1Class() != o.getASN1Class() ) {
+    public int compareTo( ASN1Tag o ) {
+        if ( getASN1Cls() != o.getASN1Cls() ) {
             return getASN1Class() - o.getASN1Class();
         }
         if ( getId() != o.getId() ) {
             return getId() - o.getId();
         }
-        if ( inefinite != o.inefinite) {
-            return ( inefinite ? 1 : 0 ) - ( o.inefinite ? 1 : 0 );
-        }
-        return 0;
+        return Arrays.compare(encodeAll(), o.encodeAll());
     }
     
     @Override

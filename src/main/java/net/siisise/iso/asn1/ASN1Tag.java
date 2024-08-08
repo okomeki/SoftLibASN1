@@ -15,12 +15,19 @@
  */
 package net.siisise.iso.asn1;
 
-/**
- * タグIDが30以下のプリミティブな型限定
- * X.690
- */
-public interface ASN1Tag {
+import java.math.BigInteger;
+import net.siisise.bind.format.TypeFormat;
+import net.siisise.io.Input;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+/**
+ * 型っぽいもの.
+ * X.690 BER / CER / DER 
+ * @param <T>
+ */
+public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
+/*
     public static final int BOOLEAN = 0x01;
     public static final int INTEGER = 0x02;
     public static final int BITSTRING = 0x03;
@@ -50,4 +57,57 @@ public interface ASN1Tag {
     public static final int CharacterString = 0x1D; // X.690
     public static final int BMPString = 0x1E; // X.690
     public static final int 拡張 = 0x1F;
+*/
+    /**
+     * ASN1Cls の値
+     * 0: UNIVERSAL
+     * 1: APPLICATION
+     * 2: CONTEXT-SPECIFIC
+     * 3: PRIVATE
+     * @return 0 ... 3
+     */
+    int getASN1Class();
+    ASN1Cls getASN1Cls();
+    /**
+     * 基本型 Primitive または 構造型 Constructed
+     * isConstructed に変えるかも.
+     * @return true : Constructed, false : Primitive
+     * @deprecated 
+     */
+    @Deprecated
+    boolean isStruct();
+    BigInteger getTag();
+    int getId();
+    
+    /**
+     * 値の取得.
+     * @return 値
+     */
+    T getValue();
+
+    /**
+     * 値のセット.
+     * @param val
+     */
+    void setValue(T val);
+    
+    <V> V rebind(TypeFormat<V> format);
+    
+    /**
+     * ヘッダ付きDER符号化.
+     * @return 
+     */
+    byte[] encodeAll();
+    /**
+     * ヘッダなしDER符号化.
+     * @return 
+     */
+    byte[] encodeBody();
+    void decodeBody(Input in, int length);
+
+// interface で <E> が使えない
+//    <E> E rebind(TypeFormat<E> format);
+    
+    Element encodeXML(Document doc);
+    void decodeXML(Element ele);
 }

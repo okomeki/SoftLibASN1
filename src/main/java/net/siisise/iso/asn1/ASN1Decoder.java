@@ -40,23 +40,8 @@ import net.siisise.io.StreamFrontPacket;
  * ToDo TypeFormat に変える
  */
 public class ASN1Decoder {
-/*
-    enum EncodeType {
-        BER, // Basic Encoding Rules
-        CER, //
-        DER, // Distinguished EncodingRules (BER + 正規化 ソート等) -> PEM化可能
-        XER,
-        JER
-    }
 
-    EncodeType encode = EncodeType.DER;
-*/
-    /*
-     * ASN1Cls へ
-     */
-    // static final String[] 種類 = {"UNIVERSAL", "APPLICATION", "コンテキスト特定", "PRIVATE"};
-
-    public static ASN1Object toASN1(InputStream in) {
+    public static ASN1Tag toASN1(InputStream in) {
         return toASN1(new StreamFrontPacket(in));
     }
     
@@ -65,7 +50,7 @@ public class ASN1Decoder {
      * @param in soruce
      * @return 某長さを指定しない終端のときはnull
      */
-    public static ASN1Object toASN1(Input in) {
+    public static ASN1Tag toASN1(Input in) {
         int code = in.read();
         ASN1Cls cl = ASN1Cls.valueOf((code >> 6) & 0x03); // 上位2bit
         boolean struct = (code & 0x20) != 0; // 構造化フラグ
@@ -137,11 +122,11 @@ public class ASN1Decoder {
      * @param struct 構造化フラグ
      * @param tag タグ番号
      */
-    static ASN1Object decode(ASN1Cls cl, boolean struct, BigInteger tag, Input in, int length) {
-        ASN1Object object;
+    static ASN1Tag decode(ASN1Cls cl, boolean struct, BigInteger tag, Input in, int length) {
+        ASN1Tag object;
         switch (cl) {
             case UNIVERSAL: // 汎用
-                object = universal(cl, struct, tag, length);
+                object = universal(struct, tag, length);
                 break;
             case CONTEXT_SPECIFIC: // Context-specific [2]
             case APPLICATION: // 応用 [Application 2]
@@ -163,13 +148,12 @@ public class ASN1Decoder {
      * @param length 参考 長さ
      * @return 
      */
-    static ASN1Object universal(ASN1Cls cl, boolean struct, BigInteger tag, int length) {
-        ASN1Object object = decodeTag(tag);
+    static ASN1Tag universal(boolean struct, BigInteger tag, int length) {
+        ASN1Tag object = decodeTag(tag);
         if (struct) {
-            if ( object instanceof ASN1Struct ) {
-                ((ASN1Struct)object).attrStruct = true;
-            } else { // CER 文字列など
-                System.out.println("構造" + cl + tag + struct);
+            if ( !(object instanceof ASN1Struct) ) {  // CER 文字列など
+//                ((ASN1Struct)object). = true;
+                System.out.println("構造 universal " + tag + struct);
                 throw new UnsupportedOperationException("unsupported Universal Object yet.");
             }
 //                    object = new ASN1Struct(cl, tag);
@@ -177,7 +161,7 @@ public class ASN1Decoder {
 //                    System.out.println("cl" + cl + "たぐs" + tag);
         }
         if (object == null) {
-            System.out.println("そのた 0x" + cl + ":" + struct + " tag:" + tag.toString(16) + " len:" + length);
+            System.out.println("そのた universal :" + struct + " tag:" + tag.toString(16) + " len:" + length);
             if (length > 0) {
                 System.out.println("謎 0x");
             }
@@ -202,10 +186,10 @@ public class ASN1Decoder {
      * @param tag
      * @return 
      */
-    static ASN1Object other(ASN1Cls cl, boolean struct, BigInteger tag) {
+    static ASN1Tag other(ASN1Cls cl, boolean struct, BigInteger tag) {
         //Object object;
         if (struct) {
-            return new ASN1Struct(cl, tag);
+            return new ASN1StructList(cl, tag);
         } else {
             throw new UnsupportedOperationException("unsupported encoding yet.");
 //            return new OCTETSTRING(); // 仮
@@ -219,13 +203,13 @@ public class ASN1Decoder {
      * @param tag 0x00 - 0x1e
      * @return
      */
-    static ASN1Object decodeTag(BigInteger tag) {
+    static ASN1Tag decodeTag(BigInteger tag) {
         int tagid = tag.intValue();
 
         ASN1 tagAndClass = ASN1.valueOf(tagid);
         if ( tagAndClass == null ) return null;
-        ASN1Object object;
-        Class<? extends ASN1Object> decodeClass;
+        ASN1Tag object;
+        Class<? extends ASN1Tag> decodeClass;
 
         if ((decodeClass = tagAndClass.coder) != null) {
             try {

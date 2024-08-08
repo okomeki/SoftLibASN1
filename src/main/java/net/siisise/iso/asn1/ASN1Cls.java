@@ -21,7 +21,7 @@ package net.siisise.iso.asn1;
 public enum ASN1Cls {
     UNIVERSAL(0), // UNIVERSAL Universal
     APPLICATION(1), // APPLICATION Application 例: [Application 3] 0x43 単体 0x67 SEQUENCE? 
-    CONTEXT_SPECIFIC(2), // コンテキスト特定 Context-specific [2] 0x82 単体 0xA2 SEQUENCE?
+    CONTEXT_SPECIFIC(2), // コンテキスト特定 / 文脈固有 / Context-specific [2] 0x82 単体 0xA2 SEQUENCE?
     PRIVATE(3); // 私用 Private
 
     byte cls;
