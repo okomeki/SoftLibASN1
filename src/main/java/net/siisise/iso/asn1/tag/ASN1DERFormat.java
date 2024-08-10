@@ -87,14 +87,14 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     /**
      * ASN1 Object をDER変換する.
      *
-     * @param obj
-     * @param body DER encoded body
+     * @param obj class struct tag の情報
+     * @param contents DER encoded contents
      * @return DER ヘッダつき
      */
-    public byte[] encodeDER(ASN1Tag obj, byte[] body) {
-        Packet pac = encodeLength(body.length);
-        pac.backWrite(encodeTagNo(obj));
-        pac.write(body);
+    public byte[] encodeDER(ASN1Tag obj, byte[] contents) {
+        Packet pac = encodeLength(contents.length);
+        pac.backWrite(encodeIdentifier(obj));
+        pac.write(contents);
         // DER infinite なし
 //        if ( obj.infinite) {
 //            pac.write(EO);
@@ -105,18 +105,33 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     /**
      * DER をまとめる.
      * タグ, length, 本体 をまとめる
-     * @param asn1 型 0 ～ 31
-     * @param body DER符号化済み値
+     * class 0:UNIVERSAL
+     * @param asn1 型 0 ～ 
+     * @param contents DER符号化済み値
      * @return DER符号化
      */
-    byte[] encodeDER(ASN1 asn1, byte[] body) {
-        Packet pac = encodeLength(body.length);
+    byte[] encodeDER(ASN1 asn1, byte[] contents) {
+        Packet pac = encodeLength(contents.length);
         pac.backWrite(encodeTagNo(asn1.tag));
-        pac.write(body);
+        pac.write(contents);
         return pac.toByteArray();
     }
 
     /**
+     * encode identifier octets.
+     * class | struct | tag から identifier octets を生成する.
+     * @param obj class struct tagの情報
+     * @return identifier octets
+     */
+    byte[] encodeIdentifier(ASN1Tag obj) {
+        BigInteger tagId = obj.getTag();
+        byte[] identifier = encodeTagNo(tagId);
+        identifier[0] |= obj.getASN1Class() << 6 | (obj.isStruct() ? 0x20 : 0);
+        return identifier;
+    }
+
+    /**
+     * identifier の tag 部分を符号化.
      * class = 0 汎用
      * struct = false
      *
@@ -124,25 +139,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @return
      */
     byte[] encodeTagNo(BigInteger tagId) {
-        byte[] tagNo = new byte[1];
-        tagNo[0] = (byte) tagId.intValue();
-        return tagNo;
-    }
-
-    /**
-     * encode TagNo
-     * class | struct | tag
-     * @param obj
-     * @return
-     */
-    byte[] encodeTagNo(ASN1Tag obj) {
-        BigInteger tagId = obj.getTag();
         int bitLen = tagId.bitLength();
         byte[] tagNo;
-
-        if (bitLen <= 5) { // 0 - 31
+        if ( bitLen <= 5 && tagId.intValue() < 31) { // 0 - 30
             tagNo = new byte[1];
-            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | tagId.intValue());
+            tagNo[0] = (byte) tagId.intValue();
         } else {
             int len = (bitLen + 6) / 7;
             tagNo = new byte[len + 1];
@@ -150,7 +151,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             for (int i = 0; i < len; i++) {
                 tagNo[i + 1] = (byte) (((i == len - 1) ? 0x80 : 0) | t.shiftRight((len - i - 1) * 7).intValue() & 0x7f);
             }
-            tagNo[0] = (byte) ((obj.getASN1Class() << 6) | (obj.isStruct() ? 0x20 : 0) | 0x1f);
+            tagNo[0] = (byte) 0x1f;
         }
         return tagNo;
     }
