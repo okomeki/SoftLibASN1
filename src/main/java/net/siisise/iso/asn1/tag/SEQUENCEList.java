@@ -32,14 +32,27 @@ public class SEQUENCEList extends ASN1StructList implements SEQUENCE {
         super(cls, tag);
     }
 
+    /**
+     * IMPLICIT / EXPLICIT な構造.
+     * @param cls ASN.1 class
+     * @param tag ASN.1 tag
+     */
     public SEQUENCEList(ASN1Cls cls, int tag) {
         super(cls, tag);
     }
 
+    /**
+     * 名前のないSEQUENCE / SEQUENCE OF.
+     */
     public SEQUENCEList() {
         super(ASN1.SEQUENCE);
     }
-    
+
+    /**
+     * SET / SET OF として構築、
+     * ソートあるといいな。
+     * @return 
+     */
     public static SEQUENCEList SET() {
         return new SEQUENCEList(ASN1Cls.UNIVERSAL, ASN1.SET.tag);
     }

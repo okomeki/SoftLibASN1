@@ -19,9 +19,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeBind;
 import net.siisise.bind.format.TypeFallFormat;
@@ -31,13 +34,11 @@ import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1StructMap;
 import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.lang.Bin;
 
 /**
- * ITU-T X.690 DER.
- * ASN1Object経由の手抜き版 
+ * ITU-T X.690 DER Format.
  */
 public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<byte[]> {
 
@@ -70,19 +71,19 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return pac;
     }
 
-    /**
+    /*
      * DER Encode.
      * inefinite 対応は外した
      *
-     * @deprecated DERをASN1Objectから分離予定
+     * deprecated DERをASN1Objectから分離予定
      * @param obj
      * @return DER
      */
-    @Deprecated
-    public byte[] encodeDER(ASN1Tag obj) {
-        byte[] body = obj.encodeBody();
-        return encodeDER(obj, body);
-    }
+//    @Deprecated
+//    public byte[] encodeDER(ASN1Tag obj) {
+//        byte[] body = obj.encodeBody();
+//        return encodeDER(obj, body);
+//    }
 
     /**
      * ASN1 Object をDER変換する.
@@ -116,7 +117,14 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         pac.write(contents);
         return pac.toByteArray();
     }
-
+/*
+    byte[] encodeDER(ASN1Cls cls, boolean struct, BigInteger tag, byte[] contents) {
+        Packet pac = encodeLength(contents.length);
+        pac.backWrite(encodeIdentifier(cls, struct, tag));
+        pac.write(contents);
+        return pac.toByteArray();
+    }
+*/
     /**
      * encode identifier octets.
      * class | struct | tag から identifier octets を生成する.
@@ -129,7 +137,13 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         identifier[0] |= obj.getASN1Class() << 6 | (obj.isStruct() ? 0x20 : 0);
         return identifier;
     }
-
+/*    
+    byte[] encodeIdentifier(ASN1Cls cls, boolean struct, BigInteger tag) {
+        byte[] identifier = encodeTagNo(tag);
+        identifier[0] |= cls.getCls() << 6 | (struct ? 0x20 : 0);
+        return identifier;
+    }
+*/
     /**
      * identifier の tag 部分を符号化.
      * class = 0 汎用
@@ -344,8 +358,9 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
 
     /**
      * ASN1String で型情報を変換可能にしておく.
+     * OBJECTIDENTIFIERを区別する.
      * @param seq ASN1String または その他のCharSequence
-     * @return 
+     * @return ASN1String または OBJECTIDENTIFIER
      */
     @Override
     public byte[] stringFormat(CharSequence seq) {
@@ -369,52 +384,65 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         }
     }
 
-    ASN1Convert cnv = new ASN1Convert();
-
     /**
-     * 並び順が保証されていればSEQUENCEとして使える
-     * なければSETとして使える
+     * SEQUENCE っぽい系統.
      *
-     * @param map
-     * @return DER SEQUENCE / SET
+     * @param map SEQUENCE になるもの
+     * @return DER SEQUENCE
      */
     @Override
     public byte[] mapFormat(Map map) {
-        ASN1Tag tag = (map instanceof ASN1Tag) ? (ASN1Tag)map : cnv.mapFormat(map);
-        if ( tag instanceof ASN1StructMap ) {
-            return mapFormat((ASN1StructMap)tag);
+        Packet pac = new PacketA();
+        for ( Object o : map.values() ) {
+            pac.write(Rebind.valueOf(o, this));
         }
-        return encodeDER(tag);
+        if ( !(map instanceof ASN1Tag) ) { // SEQUENCE Tag
+            map = new SEQUENCEMap();
+        }
+        return encodeDER((ASN1Tag)map, pac.toByteArray());
     }
     
-    public byte[] mapFormat(ASN1StructMap map) {
-        Packet pac = new PacketA();
-        for ( ASN1Tag o : map.values() ) {
-            byte[] body = o.encodeBody();
-            pac.write(encodeDER(o, body));
-        }
-        return encodeDER(map, pac.toByteArray());
-    }
-
     /**
      * SEQUENCE / SEQUENCE OF
      *
-     * @param list
+     * @param list 普通のList
      * @return DER SEQUENCE / SEQUENCE OF
      */
     @Override
     public byte[] listFormat(List list) {
-        return encodeDER(cnv.listFormat(list));
-    }
-
-    Packet list(Collection col) {
         Packet pac = new PacketA();
-        for (Object v : col) {
-            pac.write(Rebind.valueOf(v, this));
+        for ( Object o : list ) {
+            pac.write(Rebind.valueOf(o, this));
         }
-        return pac;
+        if ( !(list instanceof ASN1Tag) ) {
+            list = new SEQUENCEList();
+        }
+        return encodeDER((ASN1Tag)list, pac.toByteArray());
     }
 
+    /**
+     * SET / SET OF.
+     * DERではソートされる
+     * @param set Set系 collection
+     * @return SET
+     */
+    @Override
+    public byte[] setFormat(Set set) {
+        ASN1Convert cnv = new ASN1Convert();
+        SEQUENCEList seq = SEQUENCEList.SET();
+        
+        for ( Object o : set ) {
+            seq.add(Rebind.valueOf(o, cnv));
+//            pac.write(Rebind.valueOf(o, this));
+        }
+        Collections.sort(seq);
+        Packet pac = new PacketA();
+        for ( ASN1Tag t : seq ) {
+            pac.write((byte[])t.rebind(this));
+        }
+        return encodeDER(seq, pac.toByteArray());
+    }
+    
     /**
      * SEQUENCE
      *
@@ -422,7 +450,12 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] collectionFormat(Collection col) {
-        return encodeDER(cnv.collectionFormat(col));
+        if ( col instanceof List) {
+            return listFormat((List) col);
+        } else if ( col instanceof Set) {
+            return setFormat((Set)col);
+        }
+        return listFormat(new ArrayList(col));
     }
 
 }

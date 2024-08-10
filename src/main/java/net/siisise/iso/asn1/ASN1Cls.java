@@ -24,12 +24,12 @@ public enum ASN1Cls {
     CONTEXT_SPECIFIC(2), // コンテキスト特定 / 文脈固有 / Context-specific [2] 0x82 単体 0xA2 SEQUENCE?
     PRIVATE(3); // 私用 Private
 
-    byte cls;
+    final byte cls;
 
     ASN1Cls(int c) {
         cls = (byte) c;
     }
-
+    
     public static ASN1Cls valueOf(int id) {
         if (id >= 0x4) {
             return null;
