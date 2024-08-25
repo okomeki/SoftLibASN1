@@ -190,8 +190,8 @@ public abstract class ASN1X690 {
         }
         Constructor<? extends ASN1Tag>[] constructs = (Constructor<? extends ASN1Tag>[]) asn.coder.getConstructors();
         
-        Constructor<? extends ASN1Tag> c0 = null;
-        Constructor<? extends ASN1Tag> c1 = null;
+        Constructor<? extends ASN1Tag> c0 = null; // パラメータなし コンストラクタ
+        Constructor<? extends ASN1Tag> c1 = null; // 型のみ コンストラクタ
         
         for ( Constructor<? extends ASN1Tag> c : constructs ) {
             Type[] ps = c.getGenericParameterTypes();

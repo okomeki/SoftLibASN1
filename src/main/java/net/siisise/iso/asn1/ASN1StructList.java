@@ -69,21 +69,35 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
         return cls;
     }
 
+    /**
+     * ASN.1 class情報
+     * 0: UNIVERSAL 汎用 1:APPLICATION 応用 2:Context-Specific コンテキスト特定 3:PRIVATE 私用
+     * @return 0: UNIVERSAL 汎用 1:APPLICATION 応用 2:Context-Specific コンテキスト特定 3:PRIVATE 私用
+     */
     @Override
     public int getASN1Class() {
         return cls.cls;
     }
 
+    /**
+     * ASN.1 structed flag
+     * @return 0:false: Primitive 1:true:Constructed
+     */
     @Override
-    public boolean isStruct() {
+    public boolean isConstructed() {
         return constructed;
     }
     
+    /**
+     * 可変長形式.
+     * @return true 長さを持たない構造
+     */
     @Override
     public boolean isInefinite() {
         return inefinite;
     }
     
+    @Override
     public void setInefinite(boolean inefinite) {
         this.inefinite = inefinite;
     }
@@ -202,8 +216,8 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
 
     /**
-     *
-     * @return
+     * 内容をListとして返す.
+     * @return 内容を複製しない新規List
      */
     @Override
     public List<ASN1Tag> getValue() {
@@ -211,8 +225,8 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
     
     /**
-     *
-     * @param list
+     * 一括更新.
+     * @param list 新しい内容
      */
     @Override
     public void setValue(List<ASN1Tag> list) {
@@ -259,8 +273,9 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
 
     /**
-     *
-     * @param o
+     * 比較.
+     * class, tag, 内容で比較する
+     * @param o 対象
      * @return
      */
     @Override
@@ -286,19 +301,21 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
 
     /**
-     *
-     * @param <V>
-     * @param format
-     * @return
+     * Listとして出力する.
+     * @param <V> 出力型
+     * @param format 出力形式
+     * @return 出力
      */
+    @Override
     public <V> V rebind(TypeFormat<V> format) {
         return format.listFormat(this);
     }
 
     @Override
     public byte[] encodeAll() {
-        ASN1DERFormat enc = new ASN1DERFormat();
-        return enc.encodeDER(this, encodeBody());
+        ASN1DERFormat format = new ASN1DERFormat();
+        return rebind(format);
+//        return format.encodeUniversal(this, encodeBody());
 //        return enc.collectionFormat(this);
     }
 

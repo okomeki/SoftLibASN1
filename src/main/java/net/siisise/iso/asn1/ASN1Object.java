@@ -19,11 +19,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
-import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
 import net.siisise.iso.asn1.tag.ASN1DERFormat;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * アクセサ略
@@ -62,18 +59,30 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
         this.tag = tag.tag;
     }
 
+    /**
+     * ASN.1 class code
+     * @return 
+     */
     @Override
     public int getASN1Class() {
         return asn1class.cls;
     }
-    
+
+    /**
+     * ASN.1 class 
+     * @return 
+     */
     @Override
     public ASN1Cls getASN1Cls() {
         return asn1class;
     }
 
+    /**
+     * CER では文字列分割で構造あり?
+     * @return 
+     */
     @Override
-    public boolean isStruct() {
+    public boolean isConstructed() {
         return false;
     }
     
@@ -91,27 +100,14 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
     /**
      * ASN.1 DER encode
+     * rebindへ移行予定
      * @return 
      */
     @Override
     public byte[] encodeAll() {
         ASN1DERFormat format = new ASN1DERFormat();
-//        return rebind(format);
-        byte[] body = encodeBody();
-        return format.encodeDER(this, body);
+        return rebind(format);
     }
-
-    /**
-     * DER encoded body.
-     * 署名などで使用する.
-     * rebind でなんとかしたい
-     * @return DER encoded value
-     */
-    @Override
-    public abstract byte[] encodeBody();
-    
-//    static final byte[] INFLEN = {(byte)0x80};
-//    static final byte[] EO = {0,0};
 
     /**
      * デコーダから呼ばれるのみ
@@ -129,26 +125,6 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
     public void decodeBody( byte[] data ) {
         throw new UnsupportedOperationException("Not supported " + getTag() + " yet.");
     }
-
-    /**
-     * タグとデータを書き
-     * @param doc
-     * @return  */
-    @Override
-    abstract public Element encodeXML( Document doc );
-
-    /** データのみ読む
-     * @param element */
-    @Override
-    abstract public void decodeXML( Element element );
-
-    /**
-     * 符号化.
-     * @param <V> 出力型
-     * @param format 書式
-     * @return 変換出力
-     */
-    abstract public <V> V rebind(TypeFormat<V> format);
 
     /**
      * コンストラクタで指定するかオーバーライドするかどちらか

@@ -74,7 +74,7 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     }
 
     @Override
-    public boolean isStruct() {
+    public boolean isConstructed() {
         return constructed;
     }
 
@@ -110,7 +110,7 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     /**
      * 特定位置のものを取得する
      *
-     * @param offsets
+     * @param offsets 多段位置
      * @return 対象オブジェクト
      */
     @Override
@@ -142,6 +142,14 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
         }
     }
 
+    /**
+     * rebindに割り振り.
+     * 名前を持つMap構造なのでMapとして扱う.
+     * @param <V> formatが持つ出力型
+     * @param format 出力 format
+     * @return 出力
+     */
+    @Override
     public <V> V rebind(TypeFormat<V> format) {
         return format.mapFormat(this);
     }
@@ -150,7 +158,6 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     public byte[] encodeAll() {
         ASN1DERFormat enc = new ASN1DERFormat();
         return enc.mapFormat(this);
-//        return enc.encodeDER(this, encodeBody());
     }
 
     @Override

@@ -25,9 +25,10 @@ import net.siisise.iso.asn1.tag.INTEGER;
  */
 public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
 
-    @Override
-    public boolean isStruct();
-    
+    /**
+     * 可変長形式.
+     * @return true 長さを持たない構造
+     */
     public boolean isInefinite();
     public void setInefinite(boolean inefinite);
 

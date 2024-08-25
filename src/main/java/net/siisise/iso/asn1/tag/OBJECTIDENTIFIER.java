@@ -18,6 +18,8 @@ package net.siisise.iso.asn1.tag;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,6 +55,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
     /**
      * OID がないので仮.
      * パラメータ付きで形にする方がいいかも
+     * URIとする案もあり.
      *
      * @param <V>
      * @param format
@@ -63,6 +66,10 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
         return format.stringFormat(this);
     }
 
+    /**
+     * CharSequenceの実装.
+     * @return 長さ
+     */
     @Override
     public int length() {
         return identifier.length();
@@ -188,7 +195,6 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
             len += d.length;
         }
         return dst;
-        //      throw new UnsupportedOperationException("Not supported yet.");
     }
 
     byte[] encodeValue(int off) {
@@ -364,6 +370,18 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
     @Override
     public void decodeXML(Element ele) {
         setValue(ele.getTextContent());
+    }
+
+    /**
+     * 
+     * @return URN
+     */
+    public URI toURI() {
+        try {
+            return new URI("urn:oid:" + identifier);
+        } catch (URISyntaxException ex) {
+            throw new IllegalStateException(ex);
+        }
     }
 
     @Override

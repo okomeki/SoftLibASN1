@@ -100,7 +100,7 @@ public class ASN1Prefixed extends ASN1StructMap {
     }
 
     /**
-     *
+     * DER本体符号化.
      * @return
      */
     @Override

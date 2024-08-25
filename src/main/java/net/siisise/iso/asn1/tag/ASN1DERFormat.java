@@ -39,6 +39,10 @@ import net.siisise.lang.Bin;
 
 /**
  * ITU-T X.690 DER Format.
+ * 文字列は型情報があればそれにあわせ、UTF-8出力を標準にする。
+ * OBJECTIDENTIFIER を CharSequence に割り振る.
+ * SEQUENCEはList、Mapどちらからでも基本的に変換可能。型情報はまだ持っていないのでMapのkeyは捨てる。
+ * 
  */
 public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<byte[]> {
 
@@ -80,9 +84,9 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @return DER
      */
 //    @Deprecated
-//    public byte[] encodeDER(ASN1Tag obj) {
+//    public byte[] encodeUniversal(ASN1Tag obj) {
 //        byte[] body = obj.encodeBody();
-//        return encodeDER(obj, body);
+//        return encodeUniversal(obj, body);
 //    }
 
     /**
@@ -111,14 +115,14 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param contents DER符号化済み値
      * @return DER符号化
      */
-    byte[] encodeDER(ASN1 asn1, byte[] contents) {
+    byte[] encodeUniversal(ASN1 asn1, byte[] contents) {
         Packet pac = encodeLength(contents.length);
         pac.backWrite(encodeTagNo(asn1.tag));
         pac.write(contents);
         return pac.toByteArray();
     }
 /*
-    byte[] encodeDER(ASN1Cls cls, boolean struct, BigInteger tag, byte[] contents) {
+    byte[] encodeUniversal(ASN1Cls cls, boolean struct, BigInteger tag, byte[] contents) {
         Packet pac = encodeLength(contents.length);
         pac.backWrite(encodeIdentifier(cls, struct, tag));
         pac.write(contents);
@@ -131,19 +135,13 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param obj class struct tagの情報
      * @return identifier octets
      */
-    byte[] encodeIdentifier(ASN1Tag obj) {
+    private byte[] encodeIdentifier(ASN1Tag obj) {
         BigInteger tagId = obj.getTag();
         byte[] identifier = encodeTagNo(tagId);
-        identifier[0] |= obj.getASN1Class() << 6 | (obj.isStruct() ? 0x20 : 0);
+        identifier[0] |= obj.getASN1Class() << 6 | (obj.isConstructed() ? 0x20 : 0);
         return identifier;
     }
-/*    
-    byte[] encodeIdentifier(ASN1Cls cls, boolean struct, BigInteger tag) {
-        byte[] identifier = encodeTagNo(tag);
-        identifier[0] |= cls.getCls() << 6 | (struct ? 0x20 : 0);
-        return identifier;
-    }
-*/
+
     /**
      * identifier の tag 部分を符号化.
      * class = 0 汎用
@@ -152,7 +150,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param tagId 0 ～ 31
      * @return
      */
-    byte[] encodeTagNo(BigInteger tagId) {
+    private byte[] encodeTagNo(BigInteger tagId) {
         int bitLen = tagId.bitLength();
         byte[] tagNo;
         if ( bitLen <= 5 && tagId.intValue() < 31) { // 0 - 30
@@ -177,7 +175,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] nullFormat() {
-        return encodeDER(ASN1.NULL, new byte[0]);
+        return encodeUniversal(ASN1.NULL, new byte[0]);
     }
 
     /**
@@ -189,7 +187,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] booleanFormat(boolean bool) {
-        return encodeDER(ASN1.BOOLEAN, new byte[]{(byte) (bool ? 0xff : 0)});
+        return encodeUniversal(ASN1.BOOLEAN, new byte[]{(byte) (bool ? 0xff : 0)});
     }
 
     /**
@@ -206,11 +204,11 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             num = BigInteger.valueOf((long) num);
         }
         if (num instanceof BigInteger) {
-            return encodeDER(ASN1.INTEGER, ((BigInteger) num).toByteArray());
+            return encodeUniversal(ASN1.INTEGER, ((BigInteger) num).toByteArray());
         } else if (num instanceof BigDecimal ) {
-            return encodeDER(ASN1.REAL, encodeDecimalBody((BigDecimal)num));
+            return encodeUniversal(ASN1.REAL, encodeDecimalBody((BigDecimal)num));
         } else if (num instanceof Double || num instanceof Float) {
-            return encodeDER(ASN1.REAL, encodeDoubleBody(num.doubleValue()));
+            return encodeUniversal(ASN1.REAL, encodeDoubleBody(num.doubleValue()));
         }
         throw new UnsupportedOperationException();
     }
@@ -247,10 +245,10 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return pac.toByteArray();
     }
 
-    public static final byte PLUS_INFINITY = 0x40;
-    public static final byte MINUS_INFINITY = 0x41;
-    public static final byte NaN = 0x42;
-    public static final byte MINUS_ZERO = 0x43;
+    static final byte PLUS_INFINITY = 0x40;
+    static final byte MINUS_INFINITY = 0x41;
+    static final byte NaN = 0x42;
+    static final byte MINUS_ZERO = 0x43;
 
     /**
      * Double型の精度で IEEE754 format から ASN.1 DER 2進数表記に変換する.
@@ -320,7 +318,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] byteArrayFormat(byte[] bytes) {
-        return encodeDER(ASN1.OCTETSTRING, bytes);
+        return encodeUniversal(ASN1.OCTETSTRING, bytes);
     }
 
     /**
@@ -341,7 +339,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             nbit <<= nbitlen;
             bits.write(nbit);
         }
-        return encodeDER(ASN1.BITSTRING, bits.toByteArray());
+        return encodeUniversal(ASN1.BITSTRING, bits.toByteArray());
     }
 
     /**
@@ -353,7 +351,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(String str) {
-        return encodeDER(ASN1.UTF8String, str.getBytes(StandardCharsets.UTF_8));
+        return encodeUniversal(ASN1.UTF8String, str.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -368,17 +366,20 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
             // 汎用
             ASN1Object<String> v = (ASN1Object)seq;
             ASN1Cls cls = v.getASN1Cls();
-            BigInteger tag = v.getTag();
-            ASN1 asn = ASN1.valueOf(tag.intValue());
             
             String str = v.getValue();
             Charset enc = StandardCharsets.ISO_8859_1; // US_ASCII または ISO_8859_1
-            if ( asn == ASN1.UTF8String ) {
-                enc = StandardCharsets.UTF_8;
-            } else if ( asn == ASN1.BMPString ) {
-                enc = StandardCharsets.UTF_16BE; // UCS2かもしれない
+            if ( cls == ASN1Cls.UNIVERSAL) {
+                BigInteger tag = v.getTag();
+                ASN1 asn = ASN1.valueOf(tag.intValue());
+                if ( asn == ASN1.UTF8String ) {
+                    enc = StandardCharsets.UTF_8;
+                } else if ( asn == ASN1.BMPString ) {
+                    enc = StandardCharsets.UTF_16BE; // UCS2かもしれない
+                }
             }
-            return encodeDER(asn, str.getBytes(enc));
+            return encodeDER((ASN1Tag)seq, str.getBytes(enc));
+//            return encodeUniversal(asn, str.getBytes(enc));
         } else {
             return stringFormat(seq.toString());
         }
