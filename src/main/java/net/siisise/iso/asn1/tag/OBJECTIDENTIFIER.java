@@ -308,7 +308,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
         return name;
     }
 
-    private long get(int index) {
+    long get(int index) {
         return Long.parseLong(list.get(index));
     }
 

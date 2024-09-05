@@ -20,6 +20,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -362,7 +363,9 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(CharSequence seq) {
-        if ( seq instanceof OBJECTIDENTIFIER || seq instanceof ASN1String ) {
+        if ( seq instanceof OBJECTIDENTIFIER) {
+            return oidFormat((OBJECTIDENTIFIER) seq);
+        } else if ( seq instanceof ASN1String ) {
             // 汎用
             ASN1Object<String> v = (ASN1Object)seq;
             ASN1Cls cls = v.getASN1Cls();
@@ -383,6 +386,33 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         } else {
             return stringFormat(seq.toString());
         }
+    }
+
+    /**
+     * OBJECTIDENTIFIER の組み立て.
+     * @param oid
+     * @return OIDのDER形式出力
+     */
+    private byte[] oidFormat(OBJECTIDENTIFIER oid) {
+        List<String> list = Arrays.asList(oid.getValue().split("\\."));
+        Packet pac = new PacketA();
+        pac.write( (byte) (oid.get(0) * 40 + oid.get(1)));
+        for (int n = 2; n < list.size(); n++) {
+            pac.write(encodeOid(list.get(n)));
+        }
+        return encodeDER(oid, pac.toByteArray());
+    }
+    
+    private byte[] encodeOid(String val) {
+        BigInteger bigVal = new BigInteger(val);
+        byte[] data = new byte[bigVal.bitLength() == 0 ? 1 : ((bigVal.bitLength() + 6) / 7)];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (bigVal.shiftRight((data.length - i - 1) * 7).intValue() & 0x7F);
+            if (i < data.length - 1) {
+                data[i] |= (byte) 0x80;
+            }
+        }
+        return data;
     }
 
     /**

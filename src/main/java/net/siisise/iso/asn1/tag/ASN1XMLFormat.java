@@ -25,6 +25,7 @@ import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeFallFormat;
 import net.siisise.io.BASE64;
 import net.siisise.iso.asn1.ASN1;
+import net.siisise.iso.asn1.ASN1Tag;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -94,8 +95,8 @@ public class ASN1XMLFormat extends TypeFallFormat<Element> {
     @Override
     public Element stringFormat(CharSequence seq) {
         String eleName;
-        if ( seq instanceof ASN1String) {
-            ASN1String str = (ASN1String)seq;
+        if ( seq instanceof ASN1String || seq instanceof OBJECTIDENTIFIER ) {
+            ASN1Tag str = (ASN1String)seq;
             ASN1 asn = ASN1.valueOf(str.getTag().intValue());
             eleName = asn.name();
         } else {

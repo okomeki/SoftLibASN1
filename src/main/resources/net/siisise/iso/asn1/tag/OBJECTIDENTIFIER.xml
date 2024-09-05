@@ -32,7 +32,7 @@
                             <key oid="2" name="md2WithRSAEncryption"/>
                             <key oid="3" name="md4WithRSAEncryption"/>
                             <key oid="4" name="md5WithRSAEncryption"/>
-                            <key oid="5" name="sha1WithRSAEncryption"/>
+                            <key oid="5" name="sha-1WithRSAEncryption"/>
                             <key oid="6" name="rsaOAEPEncryptionSET"/>
                             <key oid="7" name="id-RSAES-OAEP"/>
                             <key oid="8" name="id-mgf1"/>
