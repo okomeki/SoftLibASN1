@@ -18,6 +18,7 @@ package net.siisise.iso.asn1;
 import java.math.BigInteger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
+import net.siisise.iso.asn1.tag.ASN1DERFormat;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -83,7 +84,11 @@ public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
      * @return ヘッダ含むDER出力
      */
     @Deprecated
-    byte[] encodeAll();
+    default byte[] encodeAll() {
+        ASN1DERFormat format = new ASN1DERFormat();
+        return rebind(format);
+    }
+
 
     /**
      * ヘッダなしDER符号化.
@@ -91,7 +96,9 @@ public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
      * @return DER符号化の識別子、長さのない部分
      */
     @Deprecated
-    byte[] encodeBody();
+    default byte[] encodeBody() {
+        throw new UnsupportedOperationException("廃止");
+    }
     void decodeBody(Input in, int length);
 
     /**

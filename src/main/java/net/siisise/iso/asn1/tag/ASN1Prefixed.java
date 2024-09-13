@@ -106,7 +106,8 @@ public class ASN1Prefixed extends ASN1StructMap {
     @Override
     public byte[] encodeBody() {
         if ( implicit ) { // 未対応
-            return base.encodeBody();
+            throw new UnsupportedOperationException();
+//            return base.encodeBody();
         } else {
             return base.encodeAll();
         }
@@ -120,7 +121,7 @@ public class ASN1Prefixed extends ASN1StructMap {
     @Override
     public void decodeBody(Input data, int length) {
         clear();
-        if ( implicit ) {
+        if ( implicit ) { // 未対応
             byte[] d = new byte[length];
             data.read(d);
             base = new OCTETSTRING(this.getASN1Cls(), getTag(), d);

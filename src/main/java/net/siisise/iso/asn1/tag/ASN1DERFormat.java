@@ -17,6 +17,7 @@ package net.siisise.iso.asn1.tag;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -363,9 +364,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      */
     @Override
     public byte[] stringFormat(CharSequence seq) {
-        if ( seq instanceof OBJECTIDENTIFIER) {
-            return oidFormat((OBJECTIDENTIFIER) seq);
-        } else if ( seq instanceof ASN1String ) {
+        if ( seq instanceof ASN1String ) {
             // 汎用
             ASN1Object<String> v = (ASN1Object)seq;
             ASN1Cls cls = v.getASN1Cls();
@@ -382,10 +381,26 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
                 }
             }
             return encodeDER((ASN1Tag)seq, str.getBytes(enc));
-//            return encodeUniversal(asn, str.getBytes(enc));
         } else {
             return stringFormat(seq.toString());
         }
+    }
+
+    /**
+     * URI処理.
+     * @param uri URI3986ではないので注意
+     * @return 
+     */
+    @Override
+    public byte[] uriFormat(URI uri) {
+        String scheme = uri.getScheme();
+        if ("urn".equals(scheme)) {
+            String u = uri.toString();
+            if ( u.startsWith("urn:oid:")) {
+                return oidFormat(u.substring(8));
+            }
+        }
+        return stringFormat(uri.toString());
     }
 
     /**
@@ -393,16 +408,16 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
      * @param oid
      * @return OIDのDER形式出力
      */
-    private byte[] oidFormat(OBJECTIDENTIFIER oid) {
-        List<String> list = Arrays.asList(oid.getValue().split("\\."));
+    private byte[] oidFormat(String oid) {
+        List<String> list = Arrays.asList(oid.split("\\."));
         Packet pac = new PacketA();
-        pac.write( (byte) (oid.get(0) * 40 + oid.get(1)));
+        pac.write( (byte) (Integer.parseInt(list.get(0)) * 40 + Integer.parseInt(list.get(1))));
         for (int n = 2; n < list.size(); n++) {
             pac.write(encodeOid(list.get(n)));
         }
-        return encodeDER(oid, pac.toByteArray());
+        return encodeUniversal(ASN1.OBJECTIDENTIFIER, pac.toByteArray());
     }
-    
+
     private byte[] encodeOid(String val) {
         BigInteger bigVal = new BigInteger(val);
         byte[] data = new byte[bigVal.bitLength() == 0 ? 1 : ((bigVal.bitLength() + 6) / 7)];
@@ -417,6 +432,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
 
     /**
      * SEQUENCE っぽい系統.
+     * SEQUENCEMap, ASN1Prefixed に対応する予定.
      *
      * @param map SEQUENCE になるもの
      * @return DER SEQUENCE

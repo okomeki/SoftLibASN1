@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.tag;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Set;
 import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeFallFormat;
 import net.siisise.io.BASE64;
+import net.siisise.io.BitPacket;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Tag;
 import org.w3c.dom.Document;
@@ -94,16 +96,35 @@ public class ASN1XMLFormat extends TypeFallFormat<Element> {
      */
     @Override
     public Element stringFormat(CharSequence seq) {
-        String eleName;
-        if ( seq instanceof ASN1String || seq instanceof OBJECTIDENTIFIER ) {
-            ASN1Tag str = (ASN1String)seq;
-            ASN1 asn = ASN1.valueOf(str.getTag().intValue());
-            eleName = asn.name();
+        if ( seq instanceof ASN1String ) {
+            return toElement((ASN1String)seq);
         } else {
-            eleName  = "UTF8String";
+            return stringFormat(seq.toString());
         }
+    }
+    
+    @Override
+    public Element uriFormat(URI uri) {
+        String scheme = uri.getScheme();
+        if ("urn".equals(scheme)) {
+            String u = uri.toString();
+            if ( u.startsWith("urn:oid:")) {
+                return oidFormat(u.substring(8));
+            }
+        }
+        return stringFormat(uri.toString());
+    }
+    
+    private Element oidFormat(String oid) {
+        ASN1Tag tag = new OBJECTIDENTIFIER(oid);
+        return toElement(tag);
+    }
+
+    private Element toElement(ASN1Tag tag) {
+        ASN1 asn = ASN1.valueOf(tag.getTag().intValue());
+        String eleName = asn.name();
         Element ele = doc.createElement(eleName);
-        ele.setTextContent(seq.toString());
+        ele.setTextContent(tag.getValue().toString());
         return ele;
     }
 
@@ -168,6 +189,32 @@ public class ASN1XMLFormat extends TypeFallFormat<Element> {
         String val = b64.encode(data);
         ele.setTextContent(val);
         return ele;
+    }
+
+    /**
+     * BITSTRING
+     * @param bits
+     * @return 
+     */
+    @Override
+    public Element bitArrayFormat(BitPacket bits) {
+        Element ele = doc.createElement(ASN1.BITSTRING.name());
+        long bitlen = bits.bitLength();
+        int byteLen = (int)(bitlen / 8); // フルで埋まるバイト
+        byte[] data = new byte[(int)(bitlen + 7 / 8)];
+        bits.read(data, 0, byteLen);
+        
+        bits.readBit(data, 0, bitlen);
+        int b = (int)bitlen % 8;
+        if ( b != 0 ) {
+            
+        }
+        ele.setAttribute("bitlen", String.valueOf(bitlen));
+        BASE64 b64 = new BASE64();
+        String val = b64.encode(data);
+        ele.setTextContent(val);
+        return ele;
+        
     }
     
 }

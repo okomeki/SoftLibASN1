@@ -43,7 +43,7 @@ import org.xml.sax.SAXException;
  * 文字列、int[]などの型に
  *
  */
-public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence {
+public class OBJECTIDENTIFIER extends ASN1Object<String> {
 
     private List<String> list = new ArrayList<>();
     private String identifier;
@@ -56,6 +56,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
      * OID がないので仮.
      * パラメータ付きで形にする方がいいかも
      * URIとする案もあり.
+     * Rebind.valueOfではCharSequence型として先に判定されるのでrebind() は通らない.
      *
      * @param <V>
      * @param format
@@ -63,13 +64,15 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
      */
     @Override
     public <V> V rebind(TypeFormat<V> format) {
-        return format.stringFormat(this);
+        return format.uriFormat(toURI());
+//        return format.stringFormat(this);
     }
 
-    /**
+    /*
      * CharSequenceの実装.
      * @return 長さ
      */
+/*
     @Override
     public int length() {
         return identifier.length();
@@ -84,7 +87,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
     public CharSequence subSequence(int start, int end) {
         return identifier.subSequence(start, end);
     }
-
+*/
     static class OID {
 
         private String oid;
@@ -177,40 +180,6 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
     }
 
     @Override
-    public byte[] encodeBody() {
-
-        List<byte[]> barray = new ArrayList<>();
-        barray.add(new byte[]{(byte) (get(0) * 40 + get(1))});
-        for (int n = 2; n < list.size(); n++) {
-            barray.add(encodeValue(n));
-        }
-        int len = 0;
-        for (byte[] d : barray) {
-            len += d.length;
-        }
-        byte[] dst = new byte[len];
-        len = 0;
-        for (byte[] d : barray) {
-            System.arraycopy(d, 0, dst, len, d.length);
-            len += d.length;
-        }
-        return dst;
-    }
-
-    byte[] encodeValue(int off) {
-        String val = list.get(off);
-        BigInteger bigVal = new BigInteger(val);
-        byte[] data = new byte[bigVal.bitLength() == 0 ? 1 : ((bigVal.bitLength() + 6) / 7)];
-        for (int i = 0; i < data.length; i++) {
-            data[i] = (byte) (bigVal.shiftRight((data.length - i - 1) * 7).intValue() & 0x7F);
-            if (i < data.length - 1) {
-                data[i] |= (byte) 0x80;
-            }
-        }
-        return data;
-    }
-
-    @Override
     public void decodeBody(byte[] data) {
         list.clear();
         int z = data[0] & 0xff;
@@ -247,6 +216,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> implements CharSequence
     // 仮
     @Override
     public String toString() {
+//        return getValue();
         return "OID " + getName();
     }
 

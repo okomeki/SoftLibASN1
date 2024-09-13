@@ -52,15 +52,6 @@ public class OCTETSTRING extends ASN1Object<byte[]> {
         data = d;
     }
 
-    /**
-     * @deprecated 
-     * @return 
-     */
-    @Override
-    public byte[] encodeBody() {
-        return data;
-    }
-
     @Override
     public void decodeBody(byte[] src) {
         data = src;

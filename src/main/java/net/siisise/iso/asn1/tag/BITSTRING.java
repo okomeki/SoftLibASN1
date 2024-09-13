@@ -86,19 +86,6 @@ public class BITSTRING extends ASN1Object<byte[]> {
     }
 
     /**
-     * X.690 DER encode.
-     * @return 未使用ビット数 + 本体
-     */
-    @Override
-    public byte[] encodeBody() {
-        int len = (int) ((bitlen +7l) / 8);
-        byte[] out = new byte[len + 1];
-        out[0] = (byte) ((-(bitlen % 8)) & 0x7);
-        System.arraycopy(data, 0, out, 1, len);
-        return out;
-    }
-
-    /**
      * DER decode
      * @param data 未使用ビット数 + 本体 
      */
@@ -154,7 +141,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
      */
     @Override
     public byte[] getValue() {
-        return data;
+        return data.clone();
     }
 
     /**

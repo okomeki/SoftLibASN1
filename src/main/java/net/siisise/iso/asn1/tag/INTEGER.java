@@ -44,12 +44,12 @@ public class INTEGER extends ASN1Object<BigInteger> {
         super( ASN1.INTEGER);
         val = BigInteger.valueOf(v);
     }
-
+/*
     @Override
     public byte[] encodeBody() {
         return val.toByteArray();
     }
-
+*/
     @Override
     public void decodeBody(byte[] data) {
         val = new BigInteger( data );

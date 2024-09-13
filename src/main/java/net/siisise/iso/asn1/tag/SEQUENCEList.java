@@ -51,12 +51,19 @@ public class SEQUENCEList extends ASN1StructList implements SEQUENCE {
     /**
      * SET / SET OF として構築、
      * ソートあるといいな。
-     * @return 
+     * @return SET / SET OF っぽい SEQUENCE List
      */
     public static SEQUENCEList SET() {
         return new SEQUENCEList(ASN1Cls.UNIVERSAL, ASN1.SET.tag);
     }
 
+    /**
+     * rebind変換。
+     * 型に対応する list または set として出力する。
+     * @param <V> formatで指定する出力型
+     * @param format 出力書式
+     * @return 適度に変換された出力
+     */
     @Override
     public <V> V rebind(TypeFormat<V> format) {
         if ( getTag().equals(ASN1.SEQUENCE.tag) ) {

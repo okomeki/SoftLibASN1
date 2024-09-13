@@ -81,7 +81,7 @@ public class REAL<T extends Number> extends ASN1Object<T> {
     public void setValue(T val) {
         this.val = val;
     }
-
+/*
     @Override
     public byte[] encodeBody() {
         if ( val instanceof Double || val instanceof Float) {
@@ -91,13 +91,14 @@ public class REAL<T extends Number> extends ASN1Object<T> {
         }
         throw new UnsupportedOperationException();
     }
-    
+  */  
     /**
      * Double型の精度で IEEE754 format から ASN.1 DER 2進数表記に変換する.
      * F = 0
      * @param v
      * @return ASN.1 REAL型
      */
+/*
     public byte[] encodeDoubleBody(double v) {
         long ieee754 = Double.doubleToRawLongBits(v);
         boolean flag = (ieee754 & 0x8000000000000000l) != 0;
@@ -151,10 +152,10 @@ public class REAL<T extends Number> extends ASN1Object<T> {
         pac.write(BigInteger.valueOf(m).toByteArray());
         return pac.toByteArray();
     }
-    
+  */  
     static final BigInteger TEN = BigInteger.valueOf(10);
     static final int NR3HEAD = 0x03;
-    
+/*
     public byte[] encodeDecimalBody(BigDecimal val) {
         
         if ( val.signum() == 0 ) {
@@ -183,7 +184,7 @@ public class REAL<T extends Number> extends ASN1Object<T> {
         pac.write(m.toString().getBytes(StandardCharsets.ISO_8859_1));
         return pac.toByteArray();
     }
-
+*/
     /**
      * BER 相当も入れておくかもしれない.
      * ToDo: 長さチェック

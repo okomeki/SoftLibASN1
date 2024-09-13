@@ -20,7 +20,6 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.Arrays;
 import net.siisise.io.Input;
-import net.siisise.iso.asn1.tag.ASN1DERFormat;
 
 /**
  * アクセサ略
@@ -96,17 +95,6 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
      */
     public void encodeAll( OutputStream out ) throws IOException {
         out.write(encodeAll());
-    }
-
-    /**
-     * ASN.1 DER encode
-     * rebindへ移行予定
-     * @return 
-     */
-    @Override
-    public byte[] encodeAll() {
-        ASN1DERFormat format = new ASN1DERFormat();
-        return rebind(format);
     }
 
     /**

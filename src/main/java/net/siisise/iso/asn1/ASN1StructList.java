@@ -19,12 +19,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
-import net.siisise.io.Packet;
-import net.siisise.io.PacketA;
-import net.siisise.iso.asn1.tag.ASN1DERFormat;
 import net.siisise.iso.asn1.tag.NULL;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -301,36 +299,17 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
 
     /**
-     * Listとして出力する.
+     * List または Set として出力する.
      * @param <V> 出力型
      * @param format 出力形式
      * @return 出力
      */
     @Override
     public <V> V rebind(TypeFormat<V> format) {
+        if ( getASN1Cls() == ASN1Cls.UNIVERSAL && getTag().equals(ASN1.SET.tag) ) {
+            format.setFormat(new HashSet(this));
+        }
         return format.listFormat(this);
-    }
-
-    @Override
-    public byte[] encodeAll() {
-        ASN1DERFormat format = new ASN1DERFormat();
-        return rebind(format);
-//        return format.encodeUniversal(this, encodeBody());
-//        return enc.collectionFormat(this);
-    }
-
-    @Override
-    public byte[] encodeBody() {
-        if (getId() == ASN1.SET.tag.intValue()) {
-            Collections.sort(this);
-        }
-        
-        Packet pac = new PacketA();
-
-        for (ASN1Tag object : this) {
-            pac.write(object.encodeAll());
-        }
-        return pac.toByteArray();
     }
 
     @Override

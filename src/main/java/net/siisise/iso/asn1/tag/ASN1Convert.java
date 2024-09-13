@@ -17,6 +17,7 @@ package net.siisise.iso.asn1.tag;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -93,9 +94,6 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     public ASN1Object stringFormat(CharSequence sequence) {
         if ( sequence instanceof ASN1String ){
             return new ASN1String(ASN1.valueOf(((ASN1String)sequence).getId()), ((ASN1String) sequence).getValue());
-        } else if ( sequence instanceof OBJECTIDENTIFIER ) {
-            OBJECTIDENTIFIER seq = (OBJECTIDENTIFIER) sequence;
-            return seq;
         }
         
         return stringFormat( sequence.toString());
@@ -175,6 +173,18 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
         } else { // LinkedHashMapのvalues などはCollection
             return listFormat(new ArrayList(col));
         }
+    }
+
+    @Override
+    public ASN1Object uriFormat(URI uri) {
+        String scheme = uri.getScheme();
+        if ("urn".equals(scheme)) {
+            String u = uri.toString();
+            if ( u.startsWith("urn:oid:")) {
+                return new OBJECTIDENTIFIER(u.substring(8));
+            }
+        }
+        return stringFormat(uri.toString());
     }
 /*
     @Override

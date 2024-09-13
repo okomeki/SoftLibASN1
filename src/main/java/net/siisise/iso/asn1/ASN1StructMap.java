@@ -23,10 +23,6 @@ import java.util.List;
 import java.util.Map;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
-import net.siisise.io.Packet;
-import net.siisise.io.PacketA;
-import net.siisise.iso.asn1.tag.ASN1DERFormat;
-import net.siisise.iso.asn1.tag.EndOfContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -152,24 +148,6 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     @Override
     public <V> V rebind(TypeFormat<V> format) {
         return format.mapFormat(this);
-    }
-
-    @Override
-    public byte[] encodeAll() {
-        ASN1DERFormat enc = new ASN1DERFormat();
-        return enc.mapFormat(this);
-    }
-
-    @Override
-    public byte[] encodeBody() {
-        Packet pac = new PacketA();
-        for ( Map.Entry<String,ASN1Tag> e : this.entrySet() ) {
-            pac.write(e.getValue().encodeAll());
-        }
-        if ( inefinite ) {
-            pac.write(new EndOfContent().encodeAll());
-        }
-        return pac.toByteArray();
     }
 
     @Override

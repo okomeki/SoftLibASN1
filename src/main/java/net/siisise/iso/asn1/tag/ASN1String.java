@@ -71,6 +71,7 @@ public class ASN1String extends ASN1Object<String> implements CharSequence {
      * @deprecated #rebind(TypeFormat)
      * @return 本文基本的にUTF-8
      */
+/*
     @Override
     public byte[] encodeBody() {
         switch ( ASN1.valueOf(getId()) ) {
@@ -95,7 +96,7 @@ public class ASN1String extends ASN1Object<String> implements CharSequence {
         throw new java.lang.UnsupportedOperationException(" ASN String ID:" + Integer.toHexString(getId()) );
 //        return data;
     }
-
+*/
     @Override
     public Element encodeXML( Document doc ) {
         Element ele = doc.createElement( ASN1.valueOf(getId()).toString() );
@@ -103,6 +104,13 @@ public class ASN1String extends ASN1Object<String> implements CharSequence {
         return ele;
     }
 
+    /**
+     * formatに従って符号化する。
+     * Rebindではinterfaceで継承しているCharSequence 型がprimitive型として優先されるので注意.
+     * @param <V> 出力型
+     * @param format 書式
+     * @return 出力
+     */
     @Override
     public <V> V rebind(TypeFormat<V> format) {
         return format.stringFormat(this);

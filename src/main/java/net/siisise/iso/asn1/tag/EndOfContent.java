@@ -41,12 +41,12 @@ public class EndOfContent extends ASN1Object implements ASN1Tag {
     public void setValue(Object val) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
+/*
     @Override
     public byte[] encodeBody() {
         return new byte[0];
     }
-
+*/
     @Override
     public Element encodeXML(Document doc) {
         return doc.createElement("EndOfContent");

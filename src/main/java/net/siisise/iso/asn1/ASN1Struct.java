@@ -63,6 +63,23 @@ public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
     public ASN1Tag get(BigInteger tag, int index);
 
     /**
+     * Context-Specific は番号で取得するとよい.
+     * @param tag
+     * @return 
+     */
+    public default ASN1Tag getContextSpecific(int tag) {
+        int size = size();
+        for ( int i = 0; i < size; i++ ) {
+            ASN1Tag t = get(i);
+            if ( t.getASN1Cls() == ASN1Cls.CONTEXT_SPECIFIC && t.getId() == tag) {
+                return t;
+            }
+        }
+        return null;
+    }
+//    public ASN1Tag getPrivate(int );
+    
+    /**
      * オブジェクトを奥深くに追加/更新する.
      * @param obj
      * @param index 巧妙な位置

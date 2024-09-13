@@ -37,16 +37,17 @@ public class BOOLEAN extends ASN1Object<Boolean> {
         val = b;
     }
 
-    /**
+    /*
      * バイト列エンコード.
      * @deprecated rebind 移行
      * @return 0xff | 0x00 
      */
+/*
     @Override
     public byte[] encodeBody() {
         return new byte[]{ (byte) (val ? 0xff : 0) }; // CER/DER では true は 0xff
     }
-
+*/
     /**
      * バイト列デコード.
      * @param data 

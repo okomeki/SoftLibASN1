@@ -37,16 +37,17 @@ public class NULL extends ASN1Object implements ASN1Tag {
         super( id );
     }
 
-    /**
+    /*
      * 本体なし.
      * @deprecated 移行済み
      * @return DER NULL BODY
      */
+/*
     @Override
     public byte[] encodeBody() {
         return new byte[0];
     }
-
+*/
     /**
      * 本体なし.
      * @param data 
