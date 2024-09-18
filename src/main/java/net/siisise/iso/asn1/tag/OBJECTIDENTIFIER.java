@@ -65,29 +65,8 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
     @Override
     public <V> V rebind(TypeFormat<V> format) {
         return format.uriFormat(toURI());
-//        return format.stringFormat(this);
     }
 
-    /*
-     * CharSequenceの実装.
-     * @return 長さ
-     */
-/*
-    @Override
-    public int length() {
-        return identifier.length();
-    }
-
-    @Override
-    public char charAt(int index) {
-        return identifier.charAt(index);
-    }
-
-    @Override
-    public CharSequence subSequence(int start, int end) {
-        return identifier.subSequence(start, end);
-    }
-*/
     static class OID {
 
         private String oid;
@@ -278,8 +257,12 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
         return name;
     }
 
-    long get(int index) {
+    public long get(int index) {
         return Long.parseLong(list.get(index));
+    }
+    
+    public long getLast() {
+        return Long.parseLong(list.get(list.size() - 1));
     }
 
     @Override

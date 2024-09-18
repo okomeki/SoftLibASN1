@@ -147,6 +147,14 @@
                 <key oid="1" name="internet" description="OID assignments from 1.3.6.1 - Internet">
                     <key oid="4" name="private: Private Projects">
                         <key oid="1" name="enterprise, enterprises">
+                            <key oid="3029" name="dds">
+                                <key oid="1" name="symmetric-encryption">
+                                    <key oid="1" name="blowfishECB ALGORITHM"/>
+                                    <key oid="2" name="blowfishCBC ALGORITHM"/>
+                                    <key oid="3" name="blowfishCFB ALGORITHM"/>
+                                    <key oid="4" name="blowfishOFB ALGORITHM"/>
+                                </key>
+                            </key>
                             <key oid="11129" name="Google OID">
                                 <key oid="2" name="">
                                     <key oid="4" name="">
