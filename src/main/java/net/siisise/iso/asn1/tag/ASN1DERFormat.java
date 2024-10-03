@@ -476,7 +476,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     @Override
     public byte[] setFormat(Set set) {
         ASN1Convert cnv = new ASN1Convert();
-        SEQUENCEList seq = SEQUENCEList.SET();
+        SEQUENCEList<ASN1Tag> seq = SEQUENCEList.SET();
         
         for ( Object o : set ) {
             seq.add(Rebind.valueOf(o, cnv));

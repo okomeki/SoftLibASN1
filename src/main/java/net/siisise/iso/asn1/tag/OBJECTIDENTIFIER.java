@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.xml.parsers.ParserConfigurationException;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
@@ -158,6 +159,16 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
         setValue(id);
     }
 
+    /**
+     * id 起こし.
+     *
+     * @param ids oidになるint列
+     */
+    public OBJECTIDENTIFIER(int... ids) {
+        this();
+        setValue(ids);
+    }
+
     @Override
     public void decodeBody(byte[] data) {
         list.clear();
@@ -276,6 +287,10 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
         list = Arrays.asList(identifier.split("\\."));
     }
 
+    public void setValue(int... ids) {
+        setValue(IntStream.of(ids).boxed().map(i -> i.toString()).collect(Collectors.joining(".")));
+    }
+
     /**
      * 差分で作る
      *
@@ -306,6 +321,11 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
         return new OBJECTIDENTIFIER(oid.toString());
     }
 
+    /**
+     * ひとつ上の階層を返す.
+     * 
+     * @return 上の階層のOBJECTIDENTIFIER
+     */
     public OBJECTIDENTIFIER up() {
         List<String> sub = list.subList(0, list.size() - 1);
         String oid = sub.stream().collect(Collectors.joining("."));
@@ -326,7 +346,7 @@ public class OBJECTIDENTIFIER extends ASN1Object<String> {
     }
 
     /**
-     * 
+     * urn:oid: に割り当てたObjectIdentifier URNを返す.
      * @return URN
      */
     public URI toURI() {

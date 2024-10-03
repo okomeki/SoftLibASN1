@@ -21,12 +21,14 @@ import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1StructList;
+import net.siisise.iso.asn1.ASN1Tag;
 
 /**
  * 名前なし SEQUENCE / SEQUENCE OF / SET / SET OF.
  * 
+ * @param <T> SEQUENCE OF / SET OF　特定の型
  */
-public class SEQUENCEList extends ASN1StructList implements SEQUENCE {
+public class SEQUENCEList<T extends ASN1Tag> extends ASN1StructList<T> implements SEQUENCE<T> {
 
     public SEQUENCEList(ASN1Cls cls, BigInteger tag) {
         super(cls, tag);

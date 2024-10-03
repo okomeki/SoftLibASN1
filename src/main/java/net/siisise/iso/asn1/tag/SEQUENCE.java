@@ -16,10 +16,14 @@
 package net.siisise.iso.asn1.tag;
 
 import net.siisise.iso.asn1.ASN1Struct;
+import net.siisise.iso.asn1.ASN1Tag;
 
 /**
+ * SEQUENCE型.
  * List寄りの共通の使い方ができればいい.
+ * SEQUENCEとOCTETSTRINGなど他のStruct要素を分けてSEQUENCEListとSEQUENCEMapをまとめる用途.
+ * @param <T>
  */
-public interface SEQUENCE extends ASN1Struct {
+public interface SEQUENCE<T extends ASN1Tag> extends ASN1Struct<T> {
     
 }

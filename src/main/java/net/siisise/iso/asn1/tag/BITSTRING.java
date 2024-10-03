@@ -16,12 +16,13 @@
 package net.siisise.iso.asn1.tag;
 
 import java.io.IOException;
+import java.util.BitSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
 import net.siisise.io.BigBitPacket;
-import net.siisise.io.BitPacket;
+import net.siisise.io.LittleBitPacket;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Util;
@@ -31,6 +32,8 @@ import org.w3c.dom.Element;
 /**
  * bitstring.
  * 末尾の未使用ビット数0-7を最初に記録、本体を記録.
+ * ToDo: java.util.BitSet と変換できるといい
+ * 
  * CER/DER 長さが0のとき 1オクテットの0で符号化しますょ
  * X.680 3.8.7 bitstring type
  * X.690 8.6
@@ -57,6 +60,15 @@ public class BITSTRING extends ASN1Object<byte[]> {
         data = d;
         bitlen = data.length * 8L;
     }
+    
+    /**
+     * 
+     * @param bs little endian bit stream
+     */
+    public BITSTRING(BitSet bs) {
+        this();
+        set(bs);
+    }
 
     /**
      * バイト列からビット列.
@@ -75,14 +87,9 @@ public class BITSTRING extends ASN1Object<byte[]> {
      * @param pac ビット列
      */
     @Deprecated
-    public BITSTRING(BitPacket pac) {
-        bitlen = pac.bitLength();
-        data = new byte[(int)((bitlen + 7L) / 8)];
-        pac.read(data); // バイト単位のみ
-        int b = (int)(bitlen % 8);
-        if ( b != 0 ) { // BigBitPacket / LittleBitPacket 対応 上位ビットから詰める
-            data[data.length - 1] = (byte)(pac.readInt(b) << (8 - b));
-        }
+    public BITSTRING(BigBitPacket pac) {
+        this();
+        set(pac);
     }
 
     /**
@@ -145,6 +152,46 @@ public class BITSTRING extends ASN1Object<byte[]> {
     }
 
     /**
+     * BitSetはLittle Endian なのでbit反転する.
+     * @param bs 
+     */
+    public void set(BitSet bs) {
+        int len = bs.length();
+        
+        BigBitPacket pac = new BigBitPacket();
+        for (int i = 0; i< len; i++) {
+            int b = bs.get(i) ? 1 : 0;
+            pac.writeBit(b, 1);
+        }
+    }
+
+    /**
+     * ビット順を反転して格納するので注意.
+     * @param lp 
+     */
+    public void set(LittleBitPacket lp) {
+        long len = lp.bitLength();
+        
+        BigBitPacket pac = new BigBitPacket();
+        byte[] buf = new byte[1];
+        for (long l = 0; l < len; l++) {
+            lp.readBit(buf, l, 1); // LSB下から詰める
+            pac.writeBit(buf[0], 1);
+        }
+        set(pac);
+    }
+
+    public void set(BigBitPacket pac) {
+        bitlen = pac.bitLength();
+        data = new byte[(int)((bitlen + 7L) / 8)];
+        pac.read(data); // バイト単位のみ
+        int b = (int)(bitlen % 8);
+        if ( b != 0 ) { // BigBitPacket / LittleBitPacket 対応 上位ビットから詰める
+            data[data.length - 1] = (byte)(pac.readInt(b) << (8 - b));
+        }
+    }
+
+    /**
      * 未使用ビット数を考慮しない
      * @param val */
     @Override
@@ -155,7 +202,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
 
     @Override
     public <V> V rebind(TypeFormat<V> format) {
-        BitPacket pac = new BigBitPacket();
+        BigBitPacket pac = new BigBitPacket();
         pac.writeBit(data, 0, bitlen);
         return format.bitArrayFormat(pac);
     }

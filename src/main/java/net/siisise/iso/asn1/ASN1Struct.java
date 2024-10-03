@@ -22,8 +22,9 @@ import net.siisise.iso.asn1.tag.INTEGER;
 /**
  * SEQUENCE、SETと標準以外の構造
  *
+ * @param <V> ASN.1型を限定する
  */
-public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
+public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
 
     /**
      * 可変長形式.
@@ -34,7 +35,7 @@ public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
 
     public int size();
 
-    public ASN1Tag get(int offset);
+    public V get(int offset);
     
     /**
      * 特定位置のものを取得する
@@ -60,7 +61,7 @@ public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
      * @param index 
      * @return 
      */
-    public ASN1Tag get(BigInteger tag, int index);
+    public V get(BigInteger tag, int index);
 
     /**
      * Context-Specific は番号で取得するとよい.
@@ -91,15 +92,15 @@ public interface ASN1Struct extends ASN1Tag<List<ASN1Tag>> {
      * @param obj
      * @param index 巧妙な位置
      */
-    void add(ASN1Tag obj, int... index);
-    boolean add(ASN1Tag obj);
+    void add(V obj, int... index);
+    boolean add(V obj);
 
     default void add(BigInteger val) {
-        add(new INTEGER(val));
+        add((V)new INTEGER(val));
     }
 
     default void add(long val) {
-        add(new INTEGER(val));
+        add((V)new INTEGER(val));
     }
 
 }

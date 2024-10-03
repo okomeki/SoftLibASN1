@@ -15,8 +15,10 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.math.BigInteger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
+import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,17 +39,17 @@ public class BOOLEAN extends ASN1Object<Boolean> {
         val = b;
     }
 
-    /*
-     * バイト列エンコード.
-     * @deprecated rebind 移行
-     * @return 0xff | 0x00 
+    /**
+     * IMPLICIT用
+     * @param cls asn1class
+     * @param tag asn1tag
+     * @param b boolean value
      */
-/*
-    @Override
-    public byte[] encodeBody() {
-        return new byte[]{ (byte) (val ? 0xff : 0) }; // CER/DER では true は 0xff
+    public BOOLEAN(ASN1Cls cls, BigInteger tag, boolean b) {
+        super(cls, tag);
+        val = b;
     }
-*/
+
     /**
      * バイト列デコード.
      * @param data 
@@ -82,6 +84,11 @@ public class BOOLEAN extends ASN1Object<Boolean> {
         return Boolean.toString(val);
     }
 
+    /**
+     * 値の取得.
+     * Boolean class
+     * @return 
+     */
     @Override
     public Boolean getValue() {
         return val;

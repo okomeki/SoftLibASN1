@@ -37,17 +37,6 @@ public class NULL extends ASN1Object implements ASN1Tag {
         super( id );
     }
 
-    /*
-     * 本体なし.
-     * @deprecated 移行済み
-     * @return DER NULL BODY
-     */
-/*
-    @Override
-    public byte[] encodeBody() {
-        return new byte[0];
-    }
-*/
     /**
      * 本体なし.
      * @param data 
@@ -63,7 +52,12 @@ public class NULL extends ASN1Object implements ASN1Tag {
     public Element encodeXML(Document doc) {
         return doc.createElement( ASN1.valueOf(this.getId()).name() );
     }
-    
+
+    /**
+     * NULLのパラメータ処理.
+     * なにもしない.
+     * @param element null要素
+     */
     @Override
     public void decodeXML(Element element) {
     }

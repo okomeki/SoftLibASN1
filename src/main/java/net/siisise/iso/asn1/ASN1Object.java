@@ -28,8 +28,7 @@ import net.siisise.io.Input;
  */
 public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
-//    ASN1Syntax syntax;
-    private ASN1Cls asn1class;// = ASN1Cls.UNIVERSAL;
+    private ASN1Cls cls;// = ASN1Cls.UNIVERSAL;
     private BigInteger tag;
     /** 可変長形式 DERでは未使用 */
     protected boolean inefinite = false;
@@ -44,18 +43,17 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
      * @param tag
      */
     protected ASN1Object( byte cls, BigInteger tag ) {
-        asn1class = ASN1Cls.valueOf(cls);
+        this.cls = ASN1Cls.valueOf(cls);
         this.tag = tag;
     }
 
     protected ASN1Object( ASN1Cls cls, BigInteger tag ) {
-        asn1class = cls;
+        this.cls = cls;
         this.tag = tag;
     }
 
     protected ASN1Object( ASN1 tag ) {
-        asn1class = ASN1Cls.UNIVERSAL;
-        this.tag = tag.tag;
+        this(ASN1Cls.UNIVERSAL, tag.tag);
     }
 
     /**
@@ -64,7 +62,7 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
      */
     @Override
     public int getASN1Class() {
-        return asn1class.cls;
+        return cls.cls;
     }
 
     /**
@@ -73,7 +71,13 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
      */
     @Override
     public ASN1Cls getASN1Cls() {
-        return asn1class;
+        return cls;
+    }
+    
+    @Override
+    public void setTag(ASN1Cls c, int tag) {
+        cls = c;
+        this.tag = BigInteger.valueOf(tag);
     }
 
     /**
@@ -84,7 +88,23 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
     public boolean isConstructed() {
         return false;
     }
-    
+
+    /**
+     * コンストラクタで指定するかオーバーライドするかどちらか
+     * @return 
+     */
+    @Override
+    public int getId() {
+        return tag.intValue();
+    }
+
+    @Override
+    public BigInteger getTag() {
+        if ( tag == null ) {
+            return BigInteger.valueOf(getId());
+        }
+        return tag;
+    }
 //    abstract public T getValue();
 //    abstract public void setValue(T val);
 
@@ -112,23 +132,6 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
     public void decodeBody( byte[] data ) {
         throw new UnsupportedOperationException("Not supported " + getTag() + " yet.");
-    }
-
-    /**
-     * コンストラクタで指定するかオーバーライドするかどちらか
-     * @return 
-     */
-    @Override
-    public int getId() {
-        return tag.intValue();
-    }
-
-    @Override
-    public BigInteger getTag() {
-        if ( tag == null ) {
-            return BigInteger.valueOf(getId());
-        }
-        return tag;
     }
 
     @Override

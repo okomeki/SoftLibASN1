@@ -33,10 +33,12 @@ import org.w3c.dom.NodeList;
  * ASN1 の構造系.
  * SEQUENCE / SEQUENCE OF / SET / SET OF /
  * SEQUENCE OF / SET / SET OF に適しているが SEQUENCE の省略形としても使う
+ * BER, CERでは文字列，OCTETSTRING などにも
  * Context-specific [0] [APPLICATION 0] [PRIVATE 0]
  * Rebind で判定できなさそうなのでListベースで作り直し.
+ * @param <T> ASN.1型を限定する
  */
-public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
+public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements ASN1Struct<T> {
 
     protected ASN1Cls cls;
     protected BigInteger tag;
@@ -75,6 +77,12 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     @Override
     public int getASN1Class() {
         return cls.cls;
+    }
+    
+    @Override
+    public void setTag(ASN1Cls c, int tag) {
+        cls = c;
+        this.tag = BigInteger.valueOf(tag);
     }
 
     /**
@@ -132,13 +140,14 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     }
     
     /**
-     *
-     * @param tag
+     * 末尾に追加する.
+     * 
+     * @param tag tag
      */
     @Override
-    public boolean add(ASN1Tag tag) {
+    public boolean add(T tag) {
         if ( tag == null ) {
-            tag = new NULL();
+            tag = (T)new NULL();
         }
         return super.add(tag);
     }
@@ -146,13 +155,13 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     /**
      * 同タグでn番目 (UNIVERSAL 限定?)
      *
-     * @param tag
-     * @param index
+     * @param tag tag
+     * @param index 位置
      * @return 対象オブジェクト
      * @see #tagSize( BigInteger )
      */
     @Override
-    public ASN1Tag get(BigInteger tag, int index) {
+    public T get(BigInteger tag, int index) {
         for (int n = 0; n < size(); n++) {
             if (get(n).getTag().equals(tag)) {
                 index--;
@@ -166,7 +175,7 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
 
     /**
      * オブジェクトを奥深くに追加/更新する.
-     * @param obj
+     * @param obj 要素
      * @param index 巧妙な位置
      */
     @Override
@@ -176,13 +185,13 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
             System.arraycopy(index, 1, idx, 0, idx.length);
             ((ASN1Struct)get(index[0])).set(obj, idx);
         } else {
-            set(index[0], obj);
+            set(index[0], (T)obj);
         }
     }
 
     /**
      * オブジェクトを奥深くに追加する.
-     * @param obj
+     * @param obj 要素
      * @param index 巧妙な位置
      */
     @Override
@@ -192,7 +201,7 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
             System.arraycopy(index, 1, idx, 0, idx.length);
             ((ASN1Struct)get(index[0])).add(obj, idx);
         } else {
-            add(index[0], obj);
+            add(index[0], (T)obj);
         }
     }
 
@@ -200,8 +209,8 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
     /**
      * タグ限定サイズ
      *
-     * @param tag
-     * @return 
+     * @param tag 特定のタグ
+     * @return たぐの含まれる個数
      */
     public int tagSize(BigInteger tag) {
         int count = 0;
@@ -218,7 +227,7 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
      * @return 内容を複製しない新規List
      */
     @Override
-    public List<ASN1Tag> getValue() {
+    public List<T> getValue() {
         return new ArrayList<>(this);
     }
     
@@ -227,7 +236,7 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
      * @param list 新しい内容
      */
     @Override
-    public void setValue(List<ASN1Tag> list) {
+    public void setValue(List<T> list) {
         this.clear();
         this.addAll(list);
     }
@@ -300,12 +309,12 @@ public class ASN1StructList extends ArrayList<ASN1Tag> implements ASN1Struct {
 
     /**
      * List または Set として出力する.
-     * @param <V> 出力型
+     * @param <E> 出力型
      * @param format 出力形式
      * @return 出力
      */
     @Override
-    public <V> V rebind(TypeFormat<V> format) {
+    public <E> E rebind(TypeFormat<E> format) {
         if ( getASN1Cls() == ASN1Cls.UNIVERSAL && getTag().equals(ASN1.SET.tag) ) {
             format.setFormat(new HashSet(this));
         }

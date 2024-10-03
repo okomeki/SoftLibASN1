@@ -27,7 +27,7 @@ import org.w3c.dom.Element;
  */
 public class ASN1String extends ASN1Object<String> implements CharSequence {
 
-    private String string;
+    String string;
 
     public ASN1String( ASN1 id ) {
         super(id);
@@ -61,42 +61,10 @@ public class ASN1String extends ASN1Object<String> implements CharSequence {
             string = new String(val, StandardCharsets.UTF_16BE);
             break;
         default:
-            throw new UnsupportedOperationException( "Unknows String " + getId() + " yet.");
+            throw new UnsupportedOperationException( "Unknown String " + getId() + " yet.");
         }
-        System.out.println(" " + string);
     }
 
-    /**
-     * 本文の符号化.
-     * @deprecated #rebind(TypeFormat)
-     * @return 本文基本的にUTF-8
-     */
-/*
-    @Override
-    public byte[] encodeBody() {
-        switch ( ASN1.valueOf(getId()) ) {
-        case UTF8String:
-            return string.getBytes(StandardCharsets.UTF_8);
-        case IA5String:
-        case PrintableString:
-        case CharacterString:
-        case GeneralString:
-        case GraphicString:
-        case NumericString:
-        case TeletexString:
-        case VideotexString:
-        case VisibleString:
-        case UTCTime:
-        case GeneralizedTime:
-            return string.getBytes(StandardCharsets.ISO_8859_1);
-        case BMPString:
-            return string.getBytes(StandardCharsets.UTF_16BE);
-        }
-        // data を使うかエラー
-        throw new java.lang.UnsupportedOperationException(" ASN String ID:" + Integer.toHexString(getId()) );
-//        return data;
-    }
-*/
     @Override
     public Element encodeXML( Document doc ) {
         Element ele = doc.createElement( ASN1.valueOf(getId()).toString() );

@@ -36,14 +36,15 @@ import org.w3c.dom.Element;
  * EXPLICIT の場合限定
  * tag を key としても重複して持ち
  * data を value として保持
+ * @param <T>
  */
-public class ASN1Prefixed extends ASN1StructMap {
+public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
     
     /**
      * とりあえずEXPLICIT限定
      */
     final boolean implicit = false;
-    ASN1Tag base;
+    T base;
 
     /**
      * EXPLICIT.
@@ -60,7 +61,7 @@ public class ASN1Prefixed extends ASN1StructMap {
      * @param tag tag 番号
      * @param asn 中身
      */
-    public ASN1Prefixed(ASN1Cls cls, BigInteger tag, ASN1Tag asn) {
+    public ASN1Prefixed(ASN1Cls cls, BigInteger tag, T asn) {
         super(cls, tag);
         put(tag.toString(), asn);
         base = asn;
@@ -79,7 +80,7 @@ public class ASN1Prefixed extends ASN1StructMap {
      * @param tag 番号
      * @param asn 中身
      */
-    public ASN1Prefixed(BigInteger tag, ASN1Tag asn) {
+    public ASN1Prefixed(BigInteger tag, T asn) {
         this(ASN1Cls.CONTEXT_SPECIFIC, tag, asn);
     }
 
@@ -87,7 +88,7 @@ public class ASN1Prefixed extends ASN1StructMap {
         this(BigInteger.valueOf(tag));
     }
 
-    public ASN1Prefixed(int tag, ASN1Tag asn) {
+    public ASN1Prefixed(int tag, T asn) {
         this(BigInteger.valueOf(tag), asn);
     }
 
@@ -124,21 +125,21 @@ public class ASN1Prefixed extends ASN1StructMap {
         if ( implicit ) { // 未対応
             byte[] d = new byte[length];
             data.read(d);
-            base = new OCTETSTRING(this.getASN1Cls(), getTag(), d);
+            base = (T)new OCTETSTRING(this.getASN1Cls(), getTag(), d);
         } else {
-            base = ASN1Util.toASN1(data);
+            base = (T)ASN1Util.toASN1(data);
         }
         put(tag.toString(),base);
     }
 
     /**
      * 変換.
-     * @param <E> 出力型
+     * @param <V> 出力型
      * @param format 変換器
      * @return 
      */
     @Override
-    public <E> E rebind(TypeFormat<E> format) {
+    public <V> V rebind(TypeFormat<V> format) {
         return format.mapFormat(this);
     }
 
@@ -162,7 +163,7 @@ public class ASN1Prefixed extends ASN1StructMap {
         clear();
         cls = ASN1Cls.valueOf(element.getAttribute("class"));
         tag = new BigInteger(element.getAttribute("tag"));
-        base = ASN1Util.toASN1(element);
+        base = (T)ASN1Util.toASN1(element);
         put(tag.toString(), base);
     }
 

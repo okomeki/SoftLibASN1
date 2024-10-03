@@ -20,6 +20,7 @@ import net.siisise.iso.asn1.tag.ASN1String;
 import net.siisise.iso.asn1.tag.BITSTRING;
 import net.siisise.iso.asn1.tag.BOOLEAN;
 import net.siisise.iso.asn1.tag.EndOfContent;
+import net.siisise.iso.asn1.tag.GeneralizedTime;
 import net.siisise.iso.asn1.tag.INTEGER;
 import net.siisise.iso.asn1.tag.NULL;
 import net.siisise.iso.asn1.tag.OBJECTIDENTIFIER;
@@ -63,7 +64,7 @@ public enum ASN1 {
     VideotexString(0x15,null), // 廃止?
     IA5String(0x16,ASN1String.class),
     UTCTime(0x17,ASN1String.class),
-    GeneralizedTime(0x18,ASN1String.class), // 2050年以降
+    GeneralizedTime(0x18,GeneralizedTime.class), // 2050年以降
     GraphicString(0x19,null),
     VisibleString(0x1A,null),
     GeneralString(0x1B,null),

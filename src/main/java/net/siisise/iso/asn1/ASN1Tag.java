@@ -25,7 +25,8 @@ import org.w3c.dom.Element;
 /**
  * 型っぽいもの.
  * X.690 BER / CER / DER 
- * @param <T>
+ * 
+ * @param <T> 内容型
  */
 public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
     /**
@@ -38,6 +39,45 @@ public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
      */
     int getASN1Class();
 
+    void setTag(ASN1Cls c, int tag);
+
+
+    /**
+     * tag
+     * class を UNIVERSAL にし、tag を設定する.
+     * @param tag タグ番号
+     */
+    default void setUniversal(int tag) {
+        setTag(ASN1Cls.UNIVERSAL, tag);
+    }
+
+    /**
+     * IMPLICIT [tag]
+     * class を CONTEXT-SPECIFIC にし、tag を設定する.
+     * @param tag タグ番号
+     */
+    default void setContextSpecific(int tag) {
+        setTag(ASN1Cls.CONTEXT_SPECIFIC, tag);
+    }
+
+    /**
+     * IMPLICIT [APPLICATION tag]
+     * class を APPLICATION にし、tag を設定する.
+     * @param tag タグ番号
+     */
+    default void setApplication(int tag) {
+        setTag(ASN1Cls.APPLICATION, tag);
+    }
+
+    /**
+     * IMPLICIT [PRIVATE tag]
+     * class を PRIVATE にし、tag を設定する.
+     * @param tag タグ番号
+     */
+    default void setPrivate(int tag) {
+        setTag(ASN1Cls.PRIVATE, tag);
+    }
+
     /**
      * 型.
      * @return UNIVERSAL / APPLICATION / CONTEXT-SPECIFIC / PRIVATE
@@ -46,7 +86,7 @@ public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
 
     /**
      * 基本型 Primitive または 構造型 Constructed
-     * isConstructed に変えるかも.
+     *
      * @return true : Constructed, false : Primitive
      */
     boolean isConstructed();

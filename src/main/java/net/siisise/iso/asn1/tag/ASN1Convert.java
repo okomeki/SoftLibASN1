@@ -28,14 +28,19 @@ import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeBind;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.iso.asn1.ASN1Struct;
 import net.siisise.iso.asn1.ASN1Tag;
 
 /**
- * 比較的簡単なものに対応する
+ * ASN1Tagに変換する.
+ * 比較的単純なものに対応する
+ * 基本的なものは Universal class 内でなんとか?
  */
 public class ASN1Convert implements TypeBind<ASN1Tag> {
 
+    /**
+     * ASN.1 の NULL に変換する
+     * @return ASN.1 NULL Object
+     */
     @Override
     public NULL nullFormat() {
         return new NULL();
@@ -43,20 +48,30 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
 
     /**
      * BERなどで出てくるかもしれない仮.
-     * @return 
+     * EndOfContent として扱うことにする (仮)
+     * @return EndOfContent
      */
     @Override
     public EndOfContent undefinedFormat() {
         return new EndOfContent();
     }
 
+    /**
+     * boolean 型の変換.
+     * 
+     * @param bool 真偽値
+     * @return ASN.1 BOOLEAN true または false
+     */
     @Override
     public BOOLEAN booleanFormat(boolean bool) {
         return new BOOLEAN(bool);
     }
 
     /**
+     * 整数型、浮動小数点型の変換.
+     *
      * 整数をINTEGERに、実数をREALに.
+     * 
      * @param num Java型
      * @return ASN1型 INTEGER または REAL
      */
@@ -80,18 +95,26 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * 文字列の変換.
+     * 現状標準的なUTF8Stringに変換する (仮)
+     * @param str 文字列
+     * @return ASN.1 UTF8String
+     */
     @Override
     public ASN1String stringFormat(String str) {
         return new ASN1String(ASN1.UTF8String, str);
     }
 
     /**
+     * 特殊な文字列風の変換.
+     * 文字列の特殊タイプはCharSequenceを持つ何かとして変換する
      * 特定の型がある場合はあらかじめ指定してもよい.
      * @param sequence 文字シーケンス全般
      * @return ASN.1 文字列型のいずれか
      */
     @Override
-    public ASN1Object stringFormat(CharSequence sequence) {
+    public ASN1String stringFormat(CharSequence sequence) {
         if ( sequence instanceof ASN1String ){
             return new ASN1String(ASN1.valueOf(((ASN1String)sequence).getId()), ((ASN1String) sequence).getValue());
         }
@@ -100,14 +123,15 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     }
 
     /**
-     * SEQUENCE ?
+     * SEQUENCE 変換.
+     * 名前を持つ要素なので SEQUENCEMap型として名前を持ったまま変換しておく.
+     * 
      * Class などでは名前を捨てて順序だけ使う.
-     * LinkedHashMap ならlistFormat にできるかな
-     * @param map
-     * @return 
+     * @param map Mapっぽい要素
+     * @return  ASN.1 SEQUENCE (Map)型
      */
     @Override
-    public ASN1Struct mapFormat(Map map) {
+    public SEQUENCE mapFormat(Map map) {
         SEQUENCEMap seq = new SEQUENCEMap();
         for ( Map.Entry e : ((Map<?,?>)map).entrySet() ) {
             seq.put((String)e.getKey(), (ASN1Tag)Rebind.valueOf(e.getValue(),this));
@@ -117,9 +141,12 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     }
 
     /**
-     * OCTETSTRING
-     * @param bytes
-     * @return 
+     * バイナリ列 OCTETSTRING変換.
+     * 
+     * OCTETSTRINGと対応する.
+     * 
+     * @param bytes バイト列
+     * @return ASN.1 OCTETSTRING
      */
     @Override
     public OCTETSTRING byteArrayFormat(byte[] bytes) {
@@ -127,12 +154,14 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     }
     
     /**
-     * SET / SET OF
-     * @param col
-     * @return 
+     * SET / SET OF 変換.
+     * DER型ではソート対象になる.
+     * 
+     * @param col 集合
+     * @return ASN.1 SET / SET OFタイプに対応する SEQUENCEList
      */
     @Override
-    public ASN1Struct setFormat(Set col) {
+    public SEQUENCEList setFormat(Set col) {
         SEQUENCEList set = SEQUENCEList.SET();
         for (Object v : col ) {
             ASN1Tag o = Rebind.valueOf(v, this);
@@ -145,9 +174,9 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     }
 
     /**
-     * SEQUENCE / SEQUENCE OF
-     * @param col
-     * @return 
+     * SEQUENCE / SEQUENCE OF 変換.
+     * @param col List集合
+     * @return ASN.1 SEQUENCE / SEQUENCE OF に対応する SEQUENSEList
      */
     @Override
     public SEQUENCEList listFormat(List col) {
@@ -160,12 +189,14 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
     }
     
     /**
-     * SEQUENCE / SEQUENCE OF / SET / SET OF
-     * @param col
-     * @return 
+     * SEQUENCE / SEQUENCE OF / SET / SET OF 変換.
+     * List と Set の場合、SEQUENCE系とSET系に振り分ける.
+     * その他の場合はSEQUENCE系に振り分ける.
+     * @param col Collection全般
+     * @return ASN.1 SEQUENCEList系要素
      */
     @Override
-    public ASN1Struct collectionFormat(Collection col) {
+    public SEQUENCEList collectionFormat(Collection col) {
         if ( col instanceof List ) {
             return listFormat((List)col);
         } else if ( col instanceof Set ) {
@@ -175,6 +206,13 @@ public class ASN1Convert implements TypeBind<ASN1Tag> {
         }
     }
 
+    /**
+     * 特殊URN OBJECTIDENTIFIER 変換.
+     * urn:oid: を OBJECTIDENTIFIER に変換する。
+     * その他はURI文字列としてASN1 UTF8String に変換する。(仮)
+     * @param uri
+     * @return 
+     */
     @Override
     public ASN1Object uriFormat(URI uri) {
         String scheme = uri.getScheme();

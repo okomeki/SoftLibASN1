@@ -19,29 +19,32 @@ import java.math.BigInteger;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1StructMap;
+import net.siisise.iso.asn1.ASN1Tag;
 
 /**
  * 名前付き SEQUENCE
+ *
+ * @param <T> 特定のASN.1型
  */
-public class SEQUENCEMap extends ASN1StructMap implements SEQUENCE {
-    
+public class SEQUENCEMap<T extends ASN1Tag> extends ASN1StructMap<T> implements SEQUENCE<T> {
+
     public SEQUENCEMap(ASN1Cls cls, BigInteger tag) {
         super(cls, tag);
     }
-    
+
     public SEQUENCEMap(ASN1Cls cls, int tag) {
         super(cls, tag);
     }
-    
+
     public SEQUENCEMap() {
         super(ASN1.SEQUENCE);
     }
 
     public void put(String key, BigInteger val) {
-        put(key, new INTEGER(val));
+        put(key, (T) new INTEGER(val));
     }
 
     public void put(String key, long val) {
-        put(key, new INTEGER(val));
+        put(key, (T) new INTEGER(val));
     }
 }

@@ -29,8 +29,10 @@ import org.w3c.dom.Element;
 /**
  * 名前付きで保存できる本来っぽいASN.1 Struct 形式.
  * SEQUENCE などの想定.
+ * 基本的にList系と互換性をとりつつMapっぽくする
+ * @param <T> ASN.1型を限定する
  */
-public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1Struct {
+public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> implements ASN1Struct<T> {
     
     protected ASN1Cls cls;
     protected BigInteger tag;
@@ -70,6 +72,12 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     }
 
     @Override
+    public void setTag(ASN1Cls c, int tag) {
+        cls = c;
+        this.tag = BigInteger.valueOf(tag);
+    }
+
+    @Override
     public boolean isConstructed() {
         return constructed;
     }
@@ -99,8 +107,8 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     }
 
     @Override
-    public ASN1Tag get(int offset) {
-        return (ASN1Tag)values().toArray()[offset];
+    public T get(int offset) {
+        return (T)values().toArray()[offset];
     }
     
     /**
@@ -125,15 +133,15 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     }
 
     @Override
-    public List<ASN1Tag> getValue() {
+    public List<T> getValue() {
         return new ArrayList<>(values());
     }
 
     @Override
-    public void setValue(List<ASN1Tag> val) {
+    public void setValue(List<T> val) {
         clear();
         int i = 0;
-        for ( ASN1Tag a : val ) {
+        for ( T a : val ) {
             this.put(""+i++, a);
         }
     }
@@ -160,7 +168,7 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     @Override
     public Element encodeXML(Document doc) {
         Element xml = doc.createElement(ASN1.valueOf(tag.intValue()).name());
-        for ( Map.Entry<String,ASN1Tag> e : this.entrySet() ) {
+        for ( Map.Entry<String,T> e : this.entrySet() ) {
             Element child = e.getValue().encodeXML(doc);
             child.setAttribute("name", e.getKey());
             xml.appendChild(child);
@@ -173,6 +181,11 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     *
+     * @param o
+     * @return
+     */
     @Override
     public int compareTo( ASN1Tag o ) {
         if ( getASN1Class() != o.getASN1Class() ) {
@@ -190,14 +203,14 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
     @Override
     public boolean equals(Object obj) {
         if ( obj instanceof ASN1Tag) {
-            return compareTo((ASN1Tag)obj) == 0;
+            return compareTo((T)obj) == 0;
         }
         return false;
     }
 
     @Override
-    public ASN1Tag get(BigInteger tag, int index) {
-        return (ASN1Tag)values().stream().filter(v -> v.getTag().equals(tag)).toArray()[index];
+    public T get(BigInteger tag, int index) {
+        return (T)values().stream().filter(v -> v.getTag().equals(tag)).toArray()[index];
     }
 
     @Override
@@ -216,7 +229,7 @@ public class ASN1StructMap extends LinkedHashMap<String,ASN1Tag> implements ASN1
      * @return 
      */
     @Override
-    public boolean add(ASN1Tag obj) {
+    public boolean add(T obj) {
         put(""+size(),obj);
         return true;
     }
