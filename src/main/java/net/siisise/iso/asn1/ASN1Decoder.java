@@ -23,7 +23,8 @@ import net.siisise.io.Input;
 import net.siisise.io.StreamFrontPacket;
 
 /**
- * ASN.1 のエンコード/デコード.
+ * ASN.1 のデコード.
+ * 主にBER, DER.
  * ITU-T X.680 / ISO/IEC 8824-1
  * ITU-T X.690 BER (Basic Encoding Rules) X.209 ISO 8825-1
  * ITU-T X.690 CER (Canonical Encoding Rules)
