@@ -79,6 +79,13 @@
                         <key oid="1" name="dhpublicnumber"/>
                     </key>
                 </key>
+                <key oid="113533" name="nortelnetworks">
+                    <key oid="7" name="entrust">
+                        <key oid="66" name="algorithms">
+                            <key oid="13" name="id-PasswordBasedMAC"/>
+                        </key>
+                    </key>
+                </key>
                 <key oid="113549" name="rsadsi">
                     <key oid="1" name="pkcs">
                         <key oid="1" name="pkcs-1">
@@ -229,7 +236,7 @@
                     </key>
                     <key oid="5" name="security" description="IANA Security-related objects">
                         <key oid="5" name="mechanisms">
-                            <key oid="7" name="pkix" description="">
+                            <key oid="7" name="id-pkix" description="">
                                 <key oid="0" name="mod">
                                     <key oid="18" name="pkix1-explicit"/>
                                     <key oid="58" name="id-mod-algorithmInformation-02" description="AlgorithmInformation-2009"/>
@@ -249,6 +256,10 @@
                                     <key oid="4" name="emailProtection"/>
                                     <key oid="21" name="secureShellClient"/>
                                     <key oid="22" name="secureShellServer"/>
+                                </key>
+                                <key oid="5" name="id-pkip">
+                                    <key oid="1" name="id-regCtrl"/>
+                                    <key oid="2" name="id-regInfo"/>
                                 </key>
                                 <key oid="33" name="PKIX1-PSS-OAEP-Algorithms"/>
                                 <key oid="48" name="ad: Access descriptors">

@@ -125,10 +125,9 @@ public class ASN1Util {
      * XML text
      * @param top
      * @return XML text
-     * @throws ParserConfigurationException
      * @throws TransformerException 
      */
-    public static String toXMLString(ASN1Object top) throws ParserConfigurationException, TransformerException {
+    public static String toXMLString(ASN1Tag top) throws TransformerException {
         return toString(toXML(top));
     }
 

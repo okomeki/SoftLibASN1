@@ -86,12 +86,28 @@ public class INTEGER extends ASN1Object<BigInteger> {
         return val;
     }
 
+    /**
+     * 下位32bitのみ変換される.
+     * @return 
+     */
     public int intValue() {
         return val.intValue();
     }
 
+    /**
+     * 下位64bitのみ変換される.
+     * @return 
+     */
     public long longValue() {
         return val.longValue();
+    }
+    
+    public int intValueExact() {
+        return val.intValueExact();
+    }
+    
+    public long longValueExact() {
+        return val.longValueExact();
     }
 
     @Override
