@@ -92,7 +92,7 @@
                             <key oid="0" name="modules">
                                 <key oid="1" name="pkcs-1"/>
                             </key>
-                            <key oid="1" name="rsaEncryption" description="public key"/>
+                            <key oid="1" name="rsaEncryption"/>
                             <key oid="2" name="md2WithRSAEncryption"/>
                             <key oid="3" name="md4WithRSAEncryption"/>
                             <key oid="4" name="md5WithRSAEncryption"/>
@@ -143,6 +143,7 @@
                             <key oid="0" name="modules">
                                 <key oid="1" name="pkcs-9"/>
                             </key>
+                            <key oid="1" name="emailAddress"/>
                             <key oid="3" name="id-contentType"/>
                             <key oid="4" name="id-messageDigest"/>
                             <key oid="5" name="id-signingTime"/>
@@ -176,17 +177,17 @@
                                 <key oid="2" name="pbeWithSHAAnd40bitRC4"/>
                                 <key oid="3" name="pbeWithSHAAnd3-KeyTripleDES-CBC"/>
                                 <key oid="4" name="pbeWithSHAAnd2-KeyTripleDES-CBC"/>
-                                <key oid="5" name="pbeWithSHAAnd129bitRC2-CBC"/>
+                                <key oid="5" name="pbeWithSHAAnd128bitRC2-CBC"/>
                                 <key oid="6" name="pbeWithSHAAnd40bitRC2-CBC"/>
                             </key>
                             <key oid="10" name="">
                                 <key oid="1" name="bagtypes">
-                                    <key oid="1" name="KayBag"/>
-                                    <key oid="2" name="PKCS8ShroudedKeyBag"/>
-                                    <key oid="3" name="CertBag"/>
-                                    <key oid="4" name="CRLBag"/>
-                                    <key oid="5" name="SecretBag"/>
-                                    <key oid="6" name="SafeContents"/>
+                                    <key oid="1" name="keyBag"/>
+                                    <key oid="2" name="pkcs8ShroudedKeyBag"/>
+                                    <key oid="3" name="certBag"/>
+                                    <key oid="4" name="crlBag"/>
+                                    <key oid="5" name="secretBag"/>
+                                    <key oid="6" name="safeContentsBag"/>
                                 </key>
                             </key>
                         </key>
@@ -291,6 +292,8 @@
             <key oid="4" name="X.500 attribute type">
                 <key oid="3" name="id-at-commonName"/>
                 <key oid="6" name="id-at-countryName"/>
+                <key oid="7" name="localityName"/>
+                <key oid="8" name="stateOrProvinceName"/>
                 <key oid="10" name="id-at-organizationName"/>
             </key>
             <key oid="29" name="certificateExtension (id-ce)">
