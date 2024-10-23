@@ -15,8 +15,10 @@
  */
 package net.siisise.iso.asn1;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
+import net.siisise.iso.asn1.tag.ASN1DERFormat;
 import net.siisise.iso.asn1.tag.INTEGER;
 
 /**
@@ -65,8 +67,9 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
 
     /**
      * Context-Specific は番号で取得するとよい.
+     * EXPLICIT 用
      * @param tag
-     * @return 
+     * @return 存在しない場合はnull
      */
     public default ASN1Tag getContextSpecific(int tag) {
         int size = size();
@@ -78,6 +81,52 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
         }
         return null;
     }
+    
+    /**
+     * ContextSpecific IMPLICIT からの復元
+     * @param tag
+     * @param universal IMPLICITの元の型
+     * @return
+     */
+    public default ASN1Tag getContextSpecific(int tag, ASN1 universal) {
+        ASN1Tag org = getContextSpecific(tag);
+        // 複製
+        return convert(org, universal);
+    }
+
+    /**
+     * IMPLICITからの復元
+     * @param src
+     * @param universal
+     * @return 
+     */
+    default ASN1Tag convert(ASN1Tag src, ASN1 universal) {
+        if (src == null) {
+            return null;
+        }
+        ASN1DERFormat derformat = new ASN1DERFormat();
+        byte[] der = (byte[]) src.rebind(derformat);
+        try {
+            ASN1Tag copy = ASN1Util.DERtoASN1(der);
+            copy.setTag(ASN1Cls.UNIVERSAL, universal.tag.intValue());
+            der = (byte[]) copy.rebind(derformat);
+            copy = ASN1Util.DERtoASN1(der);
+            return copy;
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+
+    /**
+     * 名前またはtagで取得.
+     * BER CER DER などはタグを使用する.
+     * JER などタグがない環境から変換された場合は名前を使用する。
+     * @param name パラメータ名 JERなど用
+     * @param tag Context-Specific タグ DER用
+     * @param universal IMPLICITの型変換
+     * @return 
+     */
+    public ASN1Tag getContextSpecific(String name, int tag, ASN1 universal);
 //    public ASN1Tag getPrivate(int );
     
     /**
