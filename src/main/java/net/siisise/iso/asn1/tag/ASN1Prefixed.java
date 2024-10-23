@@ -27,6 +27,7 @@ import org.w3c.dom.Element;
 
 /**
  * 拡張型.
+ * BER / CER / DER 型で名前を持っていないための処置っぽいのでJSONなどでは省略してもよさそう。
  * [2] などのパターン
  * 0 cls
  * 1 tag
@@ -88,6 +89,11 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
         this(BigInteger.valueOf(tag));
     }
 
+    /**
+     * CONTEXT_SPECIFIC
+     * @param tag 番号
+     * @param asn 中身
+     */
     public ASN1Prefixed(int tag, T asn) {
         this(BigInteger.valueOf(tag), asn);
     }

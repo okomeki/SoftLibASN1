@@ -17,6 +17,8 @@ package net.siisise.iso.asn1;
 
 /**
  * ASN.1 Class.
+ * 一般的なものは UNIVERSAL
+ * タグ指定はAPPLICATION, CONTEXT_SPECIFIC, PRIVATE
  */
 public enum ASN1Cls {
     UNIVERSAL(0), // UNIVERSAL Universal

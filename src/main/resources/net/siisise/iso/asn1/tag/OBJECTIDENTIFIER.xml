@@ -264,6 +264,8 @@
                                     <key oid="2" name="id-regInfo"/>
                                 </key>
                                 <key oid="6" name="algorithms">
+                                    <key oid="30" name="id-RSASSA-PSS-SHAKE128"/>
+                                    <key oid="31" name="id-RSASSA-PSS-SHAKE256"/>
                                     <key oid="32" name="id-ecdsa-with-shake128"/>
                                     <key oid="33" name="id-ecdsa-with-shake256"/>
                                 </key>

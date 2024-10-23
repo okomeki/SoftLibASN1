@@ -132,6 +132,27 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
         return obj;
     }
 
+    public T get(String key) {
+        return super.get(key);
+    }
+
+    /**
+     * IMPLICITの型変換つきで取得するなにか.
+     * 
+     * @param name module上の名前 (BER/CER/DER以外の参照方法)
+     * @param tag Context-Specific tag (BER/CER/DERの参照方法)
+     * @param universal IMPLICITで省略されている型情報
+     * @return 対象
+     */
+    @Override
+    public ASN1Tag getContextSpecific(String name, int tag, ASN1 universal) {
+        ASN1Tag val = getContextSpecific(tag, universal);
+        if (val == null) {
+            return convert(get(name), universal);
+        }
+        return val;
+    }
+
     @Override
     public List<T> getValue() {
         return new ArrayList<>(values());

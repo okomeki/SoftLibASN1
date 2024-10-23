@@ -39,19 +39,28 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
     /**
      * 拡張
-     * @param cls
-     * @param tag
+     * @param cls 種別
+     * @param tag タグ
      */
     protected ASN1Object( byte cls, BigInteger tag ) {
         this.cls = ASN1Cls.valueOf(cls);
         this.tag = tag;
     }
 
+    /**
+     * 
+     * @param cls 種別 UNIVERSAL, APPLICATION, CONTEXT_SPECIFIC, PRIVATE
+     * @param tag cls によりいろいろ
+     */
     protected ASN1Object( ASN1Cls cls, BigInteger tag ) {
         this.cls = cls;
         this.tag = tag;
     }
 
+    /**
+     * Universal ASN.1 Object
+     * @param tag 型の決まっているタグ
+     */
     protected ASN1Object( ASN1 tag ) {
         this(ASN1Cls.UNIVERSAL, tag.tag);
     }

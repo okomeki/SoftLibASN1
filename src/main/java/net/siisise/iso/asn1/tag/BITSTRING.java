@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.tag;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.BitSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,6 +25,7 @@ import net.siisise.io.BASE64;
 import net.siisise.io.BigBitPacket;
 import net.siisise.io.LittleBitPacket;
 import net.siisise.iso.asn1.ASN1;
+import net.siisise.iso.asn1.ASN1Cls;
 import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Util;
 import org.w3c.dom.Document;
@@ -59,6 +61,31 @@ public class BITSTRING extends ASN1Object<byte[]> {
         this();
         data = d;
         bitlen = data.length * 8L;
+    }
+    
+    /**
+     * 
+     * @param c
+     * @param tag
+     * @param d 
+     */
+    BITSTRING(ASN1Cls c, BigInteger tag, byte[] d) {
+        super(c, tag);
+        data = d;
+        bitlen = d.length * 8;
+    }
+    
+    /**
+     * IMPLICIT BITSTRING
+     * @param tag CONTEXT_SPECIFIC tag
+     * @param d data 複製していない
+     */
+    public BITSTRING(BigInteger tag, byte[] d) {
+        this(ASN1Cls.CONTEXT_SPECIFIC, tag, d);
+    }
+    
+    public BITSTRING(int tag, byte[] d) {
+        this(BigInteger.valueOf(tag), d);
     }
     
     /**
