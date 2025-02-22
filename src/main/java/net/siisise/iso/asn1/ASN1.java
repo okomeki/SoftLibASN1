@@ -68,9 +68,9 @@ public enum ASN1 {
     GraphicString(0x19,null),
     VisibleString(0x1A,null),
     GeneralString(0x1B,null),
-    CharacterString(0x1C,null),
+    CharacterString(0x1C,ASN1String.class), // UniversalString 廃止? UCS-4 String
     CHARACTER_STRING(0x1d,null), // X.690
-    BMPString(0x1e,ASN1String.class),
+    BMPString(0x1e,ASN1String.class), // 廃止?
     DATE(0x1f, null),
     TIME_OF_DAY(0x20, null),
     DATE_TIME(0x21, null),

@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import net.siisise.bind.Rebind;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,6 +62,15 @@ public class OBJECTIDENTIFIERTest {
         OBJECTIDENTIFIER expResult = new OBJECTIDENTIFIER("2.16.840.1.101.3.4");
         OBJECTIDENTIFIER result = instance.up();
         assertEquals(expResult, result);
+    }
+    
+    @Test
+    public void testZero() {
+        System.out.println("zero");
+        OBJECTIDENTIFIER instance = new OBJECTIDENTIFIER("0.1.2.3");
+        ASN1DERFormat d = new ASN1DERFormat();
+        byte[] v = Rebind.valueOf(instance, d);
+        
     }
     
 }

@@ -40,6 +40,7 @@ public class SEQUENCEMapTest {
         String key = "a";
         BigInteger val = BigInteger.valueOf(7);
         SEQUENCEMap instance = new SEQUENCEMap();
+        instance.put("oid", new OBJECTIDENTIFIER("2.1.3.3"));
         instance.put(key, val);
         byte[] enc = instance.encodeAll();
         ASN1Tag n = ASN1Util.toASN1(enc);

@@ -15,6 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
@@ -45,13 +46,21 @@ public class ASN1String extends ASN1Object<String> implements CharSequence {
         case UTF8String:
             string = new String(val, StandardCharsets.UTF_8);
             break;
+        case CharacterString: { // UniversalString 証明書では廃止
+                try {
+                    string = new String(val, "utf-32be");
+                } catch (UnsupportedEncodingException ex) {
+                    throw new IllegalStateException( "Unknown String " + getId() + " yet.");
+                }
+            }
+            break;
+
         case IA5String:
         case PrintableString:
-        case CharacterString:
         case GeneralString:
         case GraphicString:
         case NumericString:
-        case TeletexString:
+        case TeletexString: // 証明書では廃止
         case VideotexString:
         case VisibleString:
         case UTCTime:
