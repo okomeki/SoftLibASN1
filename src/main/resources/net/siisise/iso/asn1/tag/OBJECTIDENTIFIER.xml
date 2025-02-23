@@ -321,6 +321,16 @@
             <key oid="1" name="module">
                 <key oid="0" name="usefilDefinitions">
                     <key oid="3" name="UsefulDefinitions"/>
+                    <key oid="9" name="id-asx,id-at,id-mr,id-oa"/>
+                </key>
+                <key oid="1" name="informationFramework">
+                    
+                </key>
+                <key oid="7" name="authenticationFramework">
+                    
+                </key>
+                <key oid="39" name="passwordPolicy">
+                    
                 </key>
             </key>
             <key oid="4" name="X.500 attribute type">

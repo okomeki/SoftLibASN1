@@ -16,6 +16,7 @@
 package net.siisise.iso.asn1.syntax;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +25,6 @@ import java.util.Map;
  */
 public class ASN1Space {
     Map<String,Object> m = new HashMap<>();
-    
+    List<ASN1Syntax> s;
     
 }
