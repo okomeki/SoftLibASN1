@@ -218,7 +218,7 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
 //        if ( inefinite != o.inefinite) {
 //            return ( inefinite ? 1 : 0 ) - ( o.inefinite ? 1 : 0 );
 //        }
-        return Arrays.compare(encodeAll(), o.encodeAll());
+        return ASN1Object.compare(encodeAll(), o.encodeAll());
     }
 
     @Override

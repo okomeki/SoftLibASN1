@@ -302,7 +302,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
 //        if ( inefinite != o.inefinite) {
 //            return ( inefinite ? 1 : 0 ) - ( o.inefinite ? 1 : 0 );
 //        }
-        return Arrays.compare(encodeAll(), o.encodeAll());
+        return ASN1Object.compare(encodeAll(), o.encodeAll());
     }
 
     @Override

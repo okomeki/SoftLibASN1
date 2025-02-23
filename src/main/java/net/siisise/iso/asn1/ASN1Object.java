@@ -151,14 +151,25 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
         if ( getId() != o.getId() ) {
             return getId() - o.getId();
         }
-        return Arrays.compare(encodeAll(), o.encodeAll());
+        return compare(encodeAll(), o.encodeAll());
     }
-    
+
     @Override
     public boolean equals(Object o) {
         return o != null && o.getClass() == getClass() &&
                 this.getASN1Class() == ((ASN1Object)o).getASN1Class() &&
                 this.getId() == ((ASN1Object)o).getId() &&
                 this.inefinite == ((ASN1Object)o).inefinite;
+    }
+
+    static int compare(byte[] a, byte[] b) {
+        int len = Math.min(a.length, b.length);
+        for ( int i = 0; i < len; i++ ) {
+            if ( a[i] != b[i] ) {
+                int c = (((int)b[i]) & 0xff) - (((int)a[i]) & 0xff);
+                return c > 0 ? 1 : -1;
+            }
+        }
+        return (a.length == b.length) ? 0 : ((a.length < b.length ) ? 1 : -1);
     }
 }
