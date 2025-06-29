@@ -203,7 +203,7 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     @Override
     public byte[] numberFormat(Number num) {
         if (num instanceof Integer || num instanceof Long || num instanceof Short || num instanceof Byte) {
-            num = BigInteger.valueOf((long) num);
+            num = BigInteger.valueOf(num.longValue());
         }
         if (num instanceof BigInteger) {
             return encodeUniversal(ASN1.INTEGER, ((BigInteger) num).toByteArray());
