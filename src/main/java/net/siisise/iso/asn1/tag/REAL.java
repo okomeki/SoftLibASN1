@@ -23,11 +23,8 @@ import net.siisise.abnf.ABNFReg;
 import net.siisise.abnf.parser5234.ABNF5234;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.block.ReadableBlock;
-import net.siisise.io.Packet;
-import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Object;
-import net.siisise.lang.Bin;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

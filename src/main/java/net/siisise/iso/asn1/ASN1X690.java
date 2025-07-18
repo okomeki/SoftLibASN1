@@ -64,17 +64,18 @@ public abstract class ASN1X690 {
         return object;
     }
 
-    ReadableBlock subBlock(Input in, long len) {
+    static ReadableBlock subBlock(Input in, long len) {
         ReadableBlock contents;
         if ( in instanceof ReadableBlock ) {
             contents = ((ReadableBlock)in).readBlock(len);
         } else {
             OverBlock b = OverBlock.wrap(new byte[(int)len]);
             in.read(b);
+            b.seek(0);
             contents = b;
         }
         if (contents.length() < len) {
-            throw new java.lang.IllegalStateException("length" + len);
+            throw new java.lang.IllegalStateException("subBlock["+contents.length()+"] require " + len);
         }
         return contents;
     }

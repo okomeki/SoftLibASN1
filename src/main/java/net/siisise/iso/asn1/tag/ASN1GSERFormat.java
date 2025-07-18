@@ -17,12 +17,16 @@ package net.siisise.iso.asn1.tag;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import net.siisise.bind.Rebind;
 import net.siisise.bind.format.TypeBind;
 import net.siisise.bind.format.TypeFallFormat;
+import net.siisise.lang.Binary16;
 
 /**
  * RFC 3641
  * RFC 3642
+ * 仮対応.
  */
 public class ASN1GSERFormat extends TypeFallFormat<String> implements TypeBind<String> {
 
@@ -38,22 +42,86 @@ public class ASN1GSERFormat extends TypeFallFormat<String> implements TypeBind<S
 
     @Override
     public String numberFormat(Number num) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (num instanceof Double || num instanceof Float || num instanceof Binary16) {
+            Double d = num.doubleValue();
+            if (Double.isInfinite(d)) {
+                if ( d == Double.NEGATIVE_INFINITY ) {
+                    return "MINUS-INFINITY";
+                } else {
+                    return "PLUS-INFINITY";
+                }
+            }
+        } 
+        return num.toString();
     }
 
+    /**
+     * ChoiceOfString.
+     * 型情報は持たない
+     * NumericString
+     * PrintableString
+     * TeletexString (T61String)
+     * VideotexString
+     * IA5String
+     * GraphicString
+     * VisibleString (ISO646String)
+     * GeneralString
+     * BMPString (UCS-2)
+     * UniversalString (UCS-4)
+     * UTF8String
+     * 
+     * @param str
+     * @return 
+     */
     @Override
     public String stringFormat(String str) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String cnv = str.replace("\"","\"\"");
+        return "\"" + cnv + "\"";
     }
 
+    /**
+     * SEQUENCE.
+     * @param map
+     * @return 
+     */
     @Override
     public String mapFormat(Map map) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder out = new StringBuilder();
+        out.append("{");
+        Set es = map.entrySet();
+        boolean l = false;
+        for (Object k : map.keySet()) {
+            if (l) {
+                out.append(", ");
+            } else {
+                out.append(" ");
+                l = true;
+            }
+            out.append(Rebind.valueOf(k, this));
+            out.append(" ");
+            Object v = map.get(k);
+            out.append(Rebind.valueOf(v, this));
+        }
+        out.append(" }");
+        return out.toString();
     }
 
     @Override
     public String collectionFormat(Collection col) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        StringBuilder out = new StringBuilder();
+        out.append("[");
+        boolean l = false;
+        for ( Object v : col ) {
+            if (l) {
+                out.append(", ");
+            } else {
+                out.append(" ");
+                l = true;
+            }
+            out.append(Rebind.valueOf(v,this));
+        }
+        out.append(" ]");
+        return out.toString();
     }
 
     

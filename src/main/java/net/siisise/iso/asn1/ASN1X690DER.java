@@ -40,7 +40,6 @@ public class ASN1X690DER extends ASN1X690 implements ASN1X690DEC {
      */
     @Override
     public ASN1Tag decode(Input in) {
-        // BER/CER/DER
         int identifier = (byte) in.read();
         ASN1Cls cls = ASN1Cls.valueOf((identifier >> 6) & 0x03); // 上位2bit
         boolean constructed = (identifier & 0x20) != 0;
