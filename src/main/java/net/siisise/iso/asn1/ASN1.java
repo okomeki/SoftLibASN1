@@ -51,26 +51,26 @@ public enum ASN1 {
     EXTERNAL(0x08,null), // External and Instance-of
     REAL(0x09,REAL.class),
     ENUMERATED(0x0A,null),
-    EMBEDDED_POV(0x0B,null), // X.690
+    EMBEDDED_PDV(0x0B,null), // X.690
     UTF8String(0x0C,ASN1String.class),
     RELATIVE_OID(0x0D,null), // X.690
-    UNDEF_0E(0x0e,null), // The time
+    TIME(0x0e,null), // The time
     UNDEF_0F(0x0f,null), // 予約済み
     SEQUENCE(0x10,SEQUENCEList.class), // Sequence / Sequence-of
-    SET(0x11,SEQUENCEList.class), // Set / Set-if
-    NumericString(0x12,null),
+    SET(0x11,SEQUENCEList.class), // Set / Set-of
+    NumericString(0x12,ASN1String.class),
     PrintableString(0x13,ASN1String.class),
     TeletexString(0x14,ASN1String.class), // 廃止?
     VideotexString(0x15,null), // 廃止?
-    IA5String(0x16,ASN1String.class),
+    IA5String(0x16,ASN1String.class), // ASCII相当 ITU-T T.50 IRA 旧 IA5
     UTCTime(0x17,ASN1String.class),
     GeneralizedTime(0x18,GeneralizedTime.class), // 2050年以降
     GraphicString(0x19,null),
     VisibleString(0x1A,null),
     GeneralString(0x1B,null),
-    CharacterString(0x1C,ASN1String.class), // UniversalString 廃止? UCS-4 String
+    UniversalString(0x1C,ASN1String.class), // UniversalString 廃止? UCS-4 String
     CHARACTER_STRING(0x1d,null), // X.690
-    BMPString(0x1e,ASN1String.class), // 廃止?
+    BMPString(0x1e,ASN1String.class), // UCS-2 廃止?
     DATE(0x1f, null),
     TIME_OF_DAY(0x20, null),
     DATE_TIME(0x21, null),

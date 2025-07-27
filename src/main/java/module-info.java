@@ -25,8 +25,13 @@ module net.siisise.asn {
     exports net.siisise.iso.asn1;
 //    exports net.siisise.iso.asn1.module;
 //    exports net.siisise.iso.asn1.parser;
+    exports net.siisise.iso.asn1.annotation;
     exports net.siisise.iso.asn1.tag;
+    uses net.siisise.bind.UnbindList;
     provides net.siisise.bind.format.TypeFormat
             with net.siisise.iso.asn1.tag.ASN1Convert,
             net.siisise.iso.asn1.tag.ASN1DERFormat;
+    provides net.siisise.bind.UnbindList
+            with net.siisise.iso.asn1.ASN1Unbind;
+
 }

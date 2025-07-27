@@ -3,7 +3,18 @@
  http://www.oid-info.com/get/
 -->
 <root>
-    <key oid="1" name="ISO">
+    <key oid="0" name="">
+        <key oid="9" name="">
+            <key oid="2342" name="">
+                <key oid="19200300" name="">
+                    <key oid="100" name="">
+                        
+                    </key>
+                </key>
+            </key>
+        </key>
+    </key>
+    <key oid="1" name="iso">
         <key oid="2" name="member-body">
             <key oid="840" name="us">
                 <key oid="10040" name="x9-57">
@@ -139,11 +150,11 @@
                                 <key oid="1" name="pkcs-8"/>
                             </key>
                         </key>
-                        <key oid="9" name="pkcs9">
+                        <key oid="9" name="pkcs-9">
                             <key oid="0" name="modules">
                                 <key oid="1" name="pkcs-9"/>
                             </key>
-                            <key oid="1" name="emailAddress"/>
+                            <key oid="1" name="id-emailAddress"/>
                             <key oid="3" name="id-contentType"/>
                             <key oid="4" name="id-messageDigest"/>
                             <key oid="5" name="id-signingTime"/>
@@ -160,6 +171,11 @@
                                 </key>
                                 <key oid="2" name="aa">
                                     <key oid="46" name="id-aa-binarySigningTime"/>
+                                </key>
+                                <key oid="3" name="alg">
+                                    <key oid="28" name="id-alg-hkdf-with-sha256"/>
+                                    <key oid="29" name="id-alg-hkdf-with-sha384"/>
+                                    <key oid="30" name="id-alg-hkdf-with-sha512"/>
                                 </key>
                             </key>
                         </key>
@@ -214,8 +230,21 @@
         <key oid="3" name="identified-organization">
             <key oid="6" name="dod" description="US Department of Defense">
                 <key oid="1" name="internet">
-                    <key oid="4" name="private: Private Projects">
-                        <key oid="1" name="enterprise, enterprises">
+                    <key oid="1" name="directory"/>
+                    <key oid="2" name="mgmt"/>
+                    <key oid="3" name="experimental"/>
+                    <key oid="4" name="private" description="Private Projects">
+                        <key oid="1" name="enterprise" description="enterprises">
+                            <key oid="188" name="ascom">
+                                <key oid="7" name="systec">
+                                    <key oid="1" name="security">
+                                        <key oid="1" name="algorithms">
+                                            <key oid="2" name="idea-cbc" description="rfc3058"/>
+                                            <key odi="6" name="id-alg-CMSIDEAwrap"/>
+                                        </key>
+                                    </key>
+                                </key>
+                            </key>
                             <key oid="3029" name="dds">
                                 <key oid="1" name="symmetric-encryption">
                                     <key oid="1" name="blowfishECB ALGORITHM"/>
@@ -237,7 +266,7 @@
                     </key>
                     <key oid="5" name="security" description="IANA Security-related objects">
                         <key oid="5" name="mechanisms">
-                            <key oid="7" name="id-pkix" description="">
+                            <key oid="7" name="id-pkix" description="pkix">
                                 <key oid="0" name="mod">
                                     <key oid="18" name="pkix1-explicit"/>
                                     <key oid="33" name="id-mod-pkix1-rsa-pkalgs"/>
@@ -245,13 +274,15 @@
                                     <key oid="61" name="mod-attribute-cert-v2"/>
                                     <key oid="995" name="PKIXAlgs-2008"/>
                                 </key>
-                                <key oid="1" name="pe: PKIX certificate extensions" descripion="Public-Key Infrastructure X.509 (PKIX) certificate extensions">
+                                <key oid="1" name="pe" descripion="Public-Key Infrastructure X.509 (PKIX) certificate extensions">
                                     <key oid="1" name="id-pe-authorityInfoAccess"/>
+                                    <key oid="11" name="id-pe-subjectInfoAccess"/>
                                 </key>
-                                <key oid="2" name="qt: PKIX Policy Qualifier Types">
-                                    <key oid="1" name="cps PKIX CPS Pointer Qualifier"/>
+                                <key oid="2" name="id-qt" description="qt: PKIX Policy Qualifier Types">
+                                    <key oid="1" name="id-qt-cps" description="cps PKIX CPS Pointer Qualifier"/>
+                                    <key oid="2" name="id-qt-unotice"/>
                                 </key>
-                                <key oid="3" name="kp: Extended Key Purposes" description="Extended Key Purposes (KPs)">
+                                <key oid="3" name="kp" description="Extended Key Purposes (KPs)">
                                     <key oid="1" name="serverAuth"/>
                                     <key oid="2" name="clientAuth"/>
                                     <key oid="3" name="codeSigning"/>
@@ -270,9 +301,11 @@
                                     <key oid="33" name="id-ecdsa-with-shake256"/>
                                 </key>
                                 <key oid="33" name="PKIX1-PSS-OAEP-Algorithms"/>
-                                <key oid="48" name="ad: Access descriptors">
-                                    <key oid="1" name="ocsp: Online Certificate Statrus Protocol"/>
-                                    <key oid="2" name="caIssuers"/>
+                                <key oid="48" name="ad" description="Access descriptors">
+                                    <key oid="1" name="id-ad-ocsp" description="ocsp: Online Certificate Statrus Protocol"/>
+                                    <key oid="2" name="id-ad-caIssuers"/>
+                                    <key oid="3" name="id-ad-timeStamping"/>
+                                    <key oid="5" name="id-ad-caRepository"/>
                                 </key>
                             </key>
                         </key>
@@ -296,6 +329,10 @@
             <key oid="132" name="certicom">
                 <key oid="0" name="curve">
                     <key oid="1" name="sect163k1"/>
+                    <key oid="2" name="sect163r1"/>
+                    <key oid="3" name="sect239k1"/>
+                    <key oid="4" name="sect113r1"/>
+                    <key oid="10" name="ansip256k1"/>
                     <key oid="15" name="sect163r2"/>
                     <key oid="16" name="sect283k1"/>
                     <key oid="17" name="sect283r1"/>
@@ -317,7 +354,17 @@
         </key>
     </key>
     <key oid="2" name="joint-iso-itu-t">
-        <key oid ="5" name="X.500 Directory Service">
+        <key oid="2" name="member-body">
+            <key oid="840" name="us">
+                <key oid="10040" name="x9cm">
+                    <key oid="2" name="holdInstruction">
+                        <key oid="2" name="id-holdinstruction-callissuer"/>
+                        <key oid="3" name="id-holdinstruction-reject"/>
+                    </key>
+                </key>
+            </key>
+        </key>
+        <key oid ="5" name="ds" description="X.500 Directory Service">
             <key oid="1" name="module">
                 <key oid="0" name="usefilDefinitions">
                     <key oid="3" name="UsefulDefinitions"/>
@@ -335,19 +382,52 @@
             </key>
             <key oid="4" name="X.500 attribute type">
                 <key oid="3" name="id-at-commonName"/>
+                <key oid="4" name="id-at-surname"/>
+                <key oid="5" name="id-at-serialNumber"/>
                 <key oid="6" name="id-at-countryName"/>
-                <key oid="7" name="localityName"/>
-                <key oid="8" name="stateOrProvinceName"/>
+                <key oid="7" name="id-at-localityName"/>
+                <key oid="8" name="id-at-stateOrProvinceName"/>
                 <key oid="10" name="id-at-organizationName"/>
+                <key oid="11" name="id-at-organizationalUnitName">
+                    <key oid="1" name="id-at-collectiveOrganizationalUnitName"/>
+                </key>
+                <key oid="12" name="id-at-title"/>
+                <key oid="17" name="id-at-postalCode"/>
+                <key oid="41" name="id-at-name"/>
+                <key oid="42" name="id-at-givenName"/>
+                <key oid="43" name="id-at-initials"/>
+                <key oid="44" name="id-at-generationQualifier"/>
+                <key oid="46" name="id-at-dnQualifier"/>
+                <key oid="65" name="id-at-pseudonym"/>
             </key>
             <key oid="29" name="certificateExtension (id-ce)">
-                <key oid="14" name="Subject Key Identifier"/>
-                <key oid="15" name="Key Usage"/>
-                <key oid="17" name="Subject Alternative Name"/>
-                <key oid="19" name="Basic Constraints"/>
-                <key oid="32" name="Certificate Policies"/>
-                <key oid="35" name="Authority Key Identifier"/>
-                <key oid="37" name="Extended key usage"/>
+                <key oid="9" name="id-ce-subjectDirectoryAttributes"/>
+                <key oid="14" name="id-ce-subjectKeyIdentifier" description="Subject Key Identifier"/>
+                <key oid="15" name="id-ce-keyUsage" description="Key Usage"/>
+                <key oid="16" name="id-ce-privateKeyUsagePeriod"/>
+                <key oid="17" name="id-ce-subjectAltName" description="Subject Alternative Name"/>
+                <key oid="18" name="id-ce-issuerAltName"/>
+                <key oid="19" name="id-ce-basicConstraints" description="Basic Constraints"/>
+                <key oid="20" name="id-ce-cRLNumber"/>
+                <key oid="21" name="id-ce-cRLReasons"/>
+                <key oid="23" name="id-ce-holdInstructionCode"/>
+                <key oid="24" name="id-ce-invalidityDate"/>
+                <key oid="27" name="id-ce-deltaCRLIndicator"/>
+                <key oid="28" name="id-ce-issuingDistributionPoint"/>
+                <key oid="29" name="id-ce-certificateIssuer"/>
+                <key oid="30" name="id-ce-nameConstraints"/>
+                <key oid="31" name="id-ce-cRLDistributionPoints" description="CRL distribution points"/>
+                <key oid="32" name="id-ce-certificatePolicies" description="Certificate Policies">
+                    <key oid="0" name="anyPolicy"/>
+                </key>
+                <key oid="33" name="id-ce-policyMappings"/>
+                <key oid="35" name="id-ce-authorityKeyIdentifier" description="Authority Key Identifier"/>
+                <key oid="36" name="id-ce-policyConstraints"/>
+                <key oid="37" name="id-ce-extKeyUsage" description="Extended key usage">
+                    <key oid="0" name="anyExtendedKeyUsage"/>
+                </key>
+                <key oid="46" name="id-ce-freshestCRL"/>
+                <key oid="54" name="id-ce-inhibitAnyPolicy"/>
             </key>
         </key>
         <key oid="16" name="country">
