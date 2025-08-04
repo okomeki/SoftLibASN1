@@ -139,6 +139,12 @@ public interface ASN1Tag<T> extends java.lang.Comparable<ASN1Tag> {
     default byte[] encodeBody() {
         throw new UnsupportedOperationException("廃止");
     }
+
+    /**
+     * でこーど(まだ有効)
+     * @param in 入力
+     * @param length 最大長 
+     */
     void decodeBody(Input in, int length);
 
     /**
