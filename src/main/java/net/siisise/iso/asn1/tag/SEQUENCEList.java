@@ -60,6 +60,29 @@ public class SEQUENCEList<T extends ASN1Tag> extends ASN1StructList<T> implement
     }
 
     /**
+     * [Context-Specific tag] EXPLICIT 仮.
+     * 用EXPLICITな構造(殻)の用意
+     * @param tag タグ
+     * @return ASN1SEQUENCE
+     */
+    public static SEQUENCEList EXPLICIT(int tag) {
+        return new SEQUENCEList(ASN1Cls.CONTEXT_SPECIFIC, tag);
+    }
+
+    /**
+     * [Context-Specific ] EXPLICIT 仮.
+     * EXPLICITな殻につつんでみる
+     * @param tag タグ
+     * @param val 内容
+     * @return EXPLICITな状態
+     */
+    public static SEQUENCEList EXPLICIT(int tag, ASN1Tag val) {
+        SEQUENCEList exp = EXPLICIT(tag);
+        exp.add(val);
+        return exp;
+    }
+
+    /**
      * rebind変換。
      * 型に対応する list または set として出力する。
      * @param <V> formatで指定する出力型

@@ -18,11 +18,15 @@ package net.siisise.iso.asn1;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.Input;
+import net.siisise.iso.asn1.tag.ASN1Prefixed;
+import net.siisise.iso.asn1.tag.SEQUENCE;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,6 +37,9 @@ import org.w3c.dom.Element;
  * @param <T> ASN.1型を限定する
  */
 public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> implements ASN1Struct<T> {
+    
+    // Tagの格納
+    Map<String,ASN1Tag> ex = new HashMap<>();
     
     protected ASN1Cls cls;
     protected BigInteger tag;
@@ -104,6 +111,143 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
     @Override
     public int getId() {
         return tag.intValue();
+    }
+
+    @Override
+    public T put(String key, T val) {
+        if (val.getASN1Cls() == ASN1Cls.UNIVERSAL) {
+            ex.remove(key);
+        } else {
+            ex.put(key, val);
+            if (val instanceof ASN1Prefixed) {
+                ASN1Prefixed pre = (ASN1Prefixed)val;
+                if ( !pre.isImplicit()) { // EXPLICIT
+                    val = (T)(pre.values().toArray()[0]);
+                }
+            }
+            
+        }
+        return super.put((String)key, (T)val);
+    }
+    
+    public T put(String key, Object val) {
+        return put(key, (T)ASN1Util.toASN1(val));
+    }
+
+    /**
+     * EXPLICIT
+     * @param key
+     * @param cls
+     * @param tag
+     * @param val 
+     */
+    public void putExplicit(String key, ASN1Cls cls, int tag, T val) {
+        ASN1Prefixed s = new ASN1Prefixed(cls, BigInteger.valueOf(tag));
+        s.add(val);
+        put(key, val);
+//        ex.put(key,s);
+    }
+
+    /**
+     * EXPLICIT
+     * @param key
+     * @param tag
+     * @param val 
+     */
+    public void putExplicit(String key, int tag, T val) {
+        putExplicit(key, ASN1Cls.CONTEXT_SPECIFIC, tag, val);
+    }
+
+    /**
+     * IMPLICIT
+     * @param key
+     * @param cls
+     * @param tag
+     * @param val 
+     */
+    public void putImplicit(String key, ASN1Cls cls, int tag, T val) {
+        val.setTag(cls, tag);
+        put(key, val);
+    }
+
+    /**
+     * IMPLICIT
+     * @param key
+     * @param tag
+     * @param val 
+     */
+    public void putImplicit(String key, int tag, T val) {
+        putImplicit(key, ASN1Cls.CONTEXT_SPECIFIC, tag, val);
+    }
+
+    @Override
+    public T getContextSpecific(int exId) {
+        return toContextMap().get(exId);
+    }
+
+    public T getApplication(int exId) {
+        return toApplicationMap().get(exId);
+    }
+
+    public T getPrivate(int exId) {
+        return toPrivateMap().get(exId);
+    }
+    
+    public Map<String,ASN1Tag> toExplicitMap() {
+        Map<String,ASN1Tag> lm = new LinkedHashMap<>();
+        Set<String> ks = this.keySet();
+        for (String k : ks) {
+            ASN1Tag exv = ex.get(k);
+            if ( exv != null ) {
+                lm.put(k, exv);
+            } else {
+                lm.put(k, get(k));
+            }
+        }
+        return lm;
+    }
+    
+    public Map<Integer,T> toContextMap() {
+        return toClassMap(ASN1Cls.CONTEXT_SPECIFIC);
+    }
+
+    public Map<Integer,T> toApplicationMap() {
+        return toClassMap(ASN1Cls.APPLICATION);
+    }
+
+    public Map<Integer,T> toPrivateMap() {
+        return toClassMap(ASN1Cls.APPLICATION);
+    }
+
+    /**
+     * タグ番号で格納してみたもの.
+     * IMPLICIT, EXPLICIT どちらも内容のみ含む.
+     * @param ctype タグのASN.1 class APPLICATION, CONTEXT_SPECIFIC, PRIVATE のどれか
+     * @return 
+     */
+    public Map<Integer,T> toClassMap(ASN1Cls ctype) {
+        Map<Integer,T> cm = new LinkedHashMap<>();
+        Set<String> ks = this.keySet();
+        for(String k : ks) {
+            ASN1Tag v;
+            ASN1Tag ev = ex.get(k);
+            ASN1Cls c;
+            int id;
+            if (ev == null) {
+                v = get(k);
+                ev = v;
+            } else {
+                v = ((SEQUENCE)ev).get(0);
+            }
+            c = ev.getASN1Cls();
+            id = ev.getId();
+            if ( v != null) {
+                if (c == ctype) {
+                    cm.put(id, (T)v);
+                }
+            }
+        }
+        return cm;
     }
 
     @Override

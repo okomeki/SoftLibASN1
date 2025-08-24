@@ -146,7 +146,12 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
      */
     @Override
     public <V> V rebind(TypeFormat<V> format) {
-        return format.mapFormat(this);
+        if (implicit) {
+            return format.implicit(getASN1Class(), getId(), (V)base.rebind(format));
+        } else {
+            return format.explicit(getASN1Class(), getId(), (V)base.rebind(format));
+        }
+//        return format.mapFormat(this);
     }
 
     @Override

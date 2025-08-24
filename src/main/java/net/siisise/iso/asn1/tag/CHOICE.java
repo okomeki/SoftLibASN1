@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 okome.
+ * Copyright 2025 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,28 +15,37 @@
  */
 package net.siisise.iso.asn1.tag;
 
-import java.math.BigInteger;
-import net.siisise.iso.asn1.ASN1;
-import net.siisise.iso.asn1.ASN1Cls;
-import net.siisise.iso.asn1.ASN1StructMap;
+import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1Tag;
 
 /**
- * 名前付き SEQUENCE
- *
- * @param <T> 特定のASN.1型
+ * 抽象?
+ * X.690 BER/CER/DER 8.13 など
+ * MAX SIZE 1のSEQUENCE または name付きIMPLICIT
+ * key と tag を持ちたい?
+ * MAXサイズが1のSEQUENCEかもしれない
+ * @param <T>
  */
-public class SEQUENCEMap<T extends ASN1Tag> extends ASN1StructMap<T> implements SEQUENCE<T> {
+public class CHOICE<T extends ASN1Tag> extends SEQUENCEMap<T> {
 
-    public SEQUENCEMap(ASN1Cls cls, BigInteger tag) {
-        super(cls, tag);
+    /**
+     * 
+     * @param name
+     * @param val 
+     */
+    public void put(Object name, T val) {
+        clear();
+        super.put((String)name, val);
     }
 
-    public SEQUENCEMap(ASN1Cls cls, int tag) {
-        super(cls, tag);
-    }
-
-    public SEQUENCEMap() {
-        super(ASN1.SEQUENCE);
+    /**
+     *
+     * @param <V>
+     * @param format
+     * @return
+     */
+    @Override
+    public <V> V rebind(TypeFormat<V> format) {
+        return format.enumFormat(this);
     }
 }

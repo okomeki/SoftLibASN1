@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 okome.
+ * Copyright 2025 okome.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.siisise.iso.asn1.tag;
+package net.siisise.iso.asn1.annotation;
 
-import java.math.BigInteger;
-import net.siisise.iso.asn1.ASN1;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
 import net.siisise.iso.asn1.ASN1Cls;
-import net.siisise.iso.asn1.ASN1StructMap;
-import net.siisise.iso.asn1.ASN1Tag;
 
 /**
- * 名前付き SEQUENCE
- *
- * @param <T> 特定のASN.1型
+ * ASN.1 用Java annotation.
+ * Explicit / Implicit のタグにするかも
  */
-public class SEQUENCEMap<T extends ASN1Tag> extends ASN1StructMap<T> implements SEQUENCE<T> {
-
-    public SEQUENCEMap(ASN1Cls cls, BigInteger tag) {
-        super(cls, tag);
-    }
-
-    public SEQUENCEMap(ASN1Cls cls, int tag) {
-        super(cls, tag);
-    }
-
-    public SEQUENCEMap() {
-        super(ASN1.SEQUENCE);
-    }
+@Target(ElementType.FIELD)
+//@Retention(RetentionPolicy.RUNTIME)
+public @interface ContextSpecific {
+    ASN1Cls cls() default ASN1Cls.CONTEXT_SPECIFIC;
+    int tag();
 }

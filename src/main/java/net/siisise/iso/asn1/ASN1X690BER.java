@@ -45,6 +45,7 @@ public class ASN1X690BER extends ASN1X690 implements ASN1X690DEC {
         boolean constructed = (identifier & 0x20) != 0;
         BigInteger tagNumber = readTag(identifier, in);
         long len = readLength(in);
+//        System.out.println("cls:" + cls + " tag: " + tagNumber + " const " + constructed + " len: " + len);
         ReadableBlock contents;
         if (len < 0) {
             if ( !constructed) { // primitive の不定サイズ 不可 BER
@@ -54,6 +55,8 @@ public class ASN1X690BER extends ASN1X690 implements ASN1X690DEC {
         } else {
             contents = subBlock(in, len);
         }
+//        System.out.println(Bin.toHex(contents.toByteArray()));
+//        contents.seek(0);
 
         return decode(identifier, cls, constructed, tagNumber, len, contents);
     }

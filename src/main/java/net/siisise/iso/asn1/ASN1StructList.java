@@ -162,11 +162,11 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
      */
     @Override
     public T get(BigInteger tag, int index) {
-        for (int n = 0; n < size(); n++) {
-            if (get(n).getTag().equals(tag)) {
+        for (T t : this) {
+            if (t.getTag().equals(tag)) {
                 index--;
                 if (index < 0) {
-                    return get(n);
+                    return t;
                 }
             }
         }
@@ -201,7 +201,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
      * @param index 巧妙な位置
      */
     @Override
-    public void add(ASN1Tag obj, int... index) {
+    public void add(T obj, int... index) {
         if (index.length > 1) {
             int[] idx = new int[index.length - 1];
             System.arraycopy(index, 1, idx, 0, idx.length);
@@ -256,7 +256,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
     public void decodeBody(Input in, int length) {
         clear();
         if (length >= 0) {
-            Input data = in.readPacket(length);
+            Input data = ASN1X690.subBlock(in, length);
             decodeBody(data);
         } else {
             inefinite = true;
@@ -267,7 +267,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
     void decodeBody(Input in) {
         while (in.size() > 0) {
             ASN1Tag o = ASN1Util.toASN1(in);
-            add(o);
+            add((T)o);
         }
     }
 
@@ -281,7 +281,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
             if (o.getASN1Class() == 0) {
                 break;
             }
-            add(o);
+            add((T)o);
         }
     }
 
@@ -367,7 +367,7 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
             Node n = child.item(i);
             if (n instanceof Element) {
                 ASN1Tag o = ASN1Util.toASN1((Element) n);
-                add(o);
+                add((T)o);
             }
         }
     }

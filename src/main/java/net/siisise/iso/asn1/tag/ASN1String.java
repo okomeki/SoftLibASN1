@@ -15,7 +15,7 @@
  */
 package net.siisise.iso.asn1.tag;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.iso.asn1.ASN1;
@@ -24,54 +24,94 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * 文字列の共通処理
+ * 文字列の共通処理 (仮).
+ * DirectryString ::= {
+ *   PrintableString
+ *   TeletexString
+ *   BMPString
+ *   UTF8String
+ *   UniversalString
+ * }
+ * VisibleString
  */
 public class ASN1String extends ASN1Object<String> implements CharSequence {
 
+    /**
+     * 型指定用。
+     * tagとしては利用しない
+     */
+    ASN1 tag;
     String string;
 
     public ASN1String( ASN1 id ) {
         super(id);
+        tag = id;
     }
 
     public ASN1String( ASN1 id, String str ) {
         super(id);
+        tag = id;
         string = str;
     }
 
     @Override
     public void decodeBody( byte[] val ) {
 //        data = (byte[]) val.clone();
-        switch ( ASN1.valueOf(getId()) ) {
+        switch ( tag ) {
         case UTF8String:
             string = new String(val, StandardCharsets.UTF_8);
             break;
-        case CharacterString: { // UniversalString 証明書では廃止
-                try {
-                    string = new String(val, "utf-32be");
-                } catch (UnsupportedEncodingException ex) {
-                    throw new IllegalStateException( "Unknown String " + getId() + " yet.");
-                }
-            }
+        case BMPString: // ISO 10646-1 UCS-2 基本多言語面
+            string = new String(val, StandardCharsets.UTF_16BE);
             break;
-
-        case IA5String:
+        case UniversalString:  // UCS-4 CharacterString 証明書では互換用
+                string = new String(val, Charset.forName("utf-32be"));
+            break;
+        case IA5String: // ASCII ITU-T T.50 IRA の旧称 INTERNATIONAL ALPHABET No. 5
         case PrintableString:
         case GeneralString:
         case GraphicString:
         case NumericString:
-        case TeletexString: // 証明書では廃止
         case VideotexString:
         case VisibleString:
-        case UTCTime:
+        case UTCTime: // VisibleString と同じ
             string = new String(val, StandardCharsets.US_ASCII);
             break;
-        case BMPString: // ISO 10646-1 基本多言語面
-            string = new String(val, StandardCharsets.UTF_16BE);
+        case TeletexString: // ISO-8859-1 証明書では互換のみ 仮実装 ITU-T T.61 ページ切り替えは未対応 cp1036 cp20261
+            string = new String(val, StandardCharsets.ISO_8859_1);
             break;
         default:
             throw new UnsupportedOperationException( "Unknown String " + getId() + " yet.");
         }
+    }
+    
+    /**
+     * 符号化
+     * tag別があるので残すかも.
+     * @return 符号
+     */
+    @Override
+    public byte[] encodeBody() {
+        switch ( tag ) {
+            case UTF8String:
+                return string.getBytes(StandardCharsets.UTF_8);
+            case BMPString:
+                return string.getBytes(StandardCharsets.UTF_16BE);
+            case UniversalString:
+                return string.getBytes(Charset.forName("utf-32be"));
+            case IA5String:
+            case PrintableString:
+            case GeneralString:
+            case GraphicString:
+            case NumericString:
+            case VideotexString:
+            case VisibleString:
+            case UTCTime:
+                return string.getBytes(StandardCharsets.US_ASCII);
+            case TeletexString:
+                return string.getBytes(StandardCharsets.ISO_8859_1);
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

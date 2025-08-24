@@ -18,7 +18,6 @@ package net.siisise.iso.asn1.tag;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +34,6 @@ import net.siisise.io.Packet;
 import net.siisise.io.PacketA;
 import net.siisise.iso.asn1.ASN1;
 import net.siisise.iso.asn1.ASN1Cls;
-import net.siisise.iso.asn1.ASN1Object;
 import net.siisise.iso.asn1.ASN1Tag;
 import net.siisise.lang.Bin;
 
@@ -366,21 +364,8 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     public byte[] stringFormat(CharSequence seq) {
         if ( seq instanceof ASN1String ) {
             // 汎用
-            ASN1Object<String> v = (ASN1Object)seq;
-            ASN1Cls cls = v.getASN1Cls();
-            
-            String str = v.getValue();
-            Charset enc = StandardCharsets.ISO_8859_1; // US_ASCII または ISO_8859_1
-            if ( cls == ASN1Cls.UNIVERSAL) {
-                BigInteger tag = v.getTag();
-                ASN1 asn = ASN1.valueOf(tag.intValue());
-                if ( asn == ASN1.UTF8String ) {
-                    enc = StandardCharsets.UTF_8;
-                } else if ( asn == ASN1.BMPString ) {
-                    enc = StandardCharsets.UTF_16BE; // UCS2かもしれない
-                }
-            }
-            return encodeDER((ASN1Tag)seq, str.getBytes(enc));
+            ASN1String v = (ASN1String)seq;
+            return encodeDER((ASN1Tag)seq, v.encodeBody());
         } else {
             return stringFormat(seq.toString());
         }
@@ -440,6 +425,9 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
     @Override
     public byte[] mapFormat(Map map) {
         Packet pac = new PacketA();
+        if (map instanceof CHOICE) {
+            return enumFormat(map);
+        }
         for ( Object o : map.values() ) {
             pac.write(Rebind.valueOf(o, this));
         }
@@ -505,4 +493,17 @@ public class ASN1DERFormat extends TypeFallFormat<byte[]> implements TypeBind<by
         return listFormat(new ArrayList(col));
     }
 
+    @Override
+    public byte[] explicit(int cls, int tag, byte[] v) {
+        SEQUENCEList<ASN1Tag> seq = new SEQUENCEList(ASN1Cls.valueOf(cls), tag);
+        return encodeDER(seq, v);
+    }
+
+    @Override
+    public byte[] implicit(int cls, int tag, byte[] v) {
+        // 差し替え
+        //B
+        throw new UnsupportedOperationException();
+//        return v;
+    }
 }

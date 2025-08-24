@@ -18,8 +18,6 @@ package net.siisise.iso.asn1.tag;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.BitSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.siisise.bind.format.TypeFormat;
 import net.siisise.io.BASE64;
 import net.siisise.io.BigBitPacket;
@@ -64,17 +62,31 @@ public class BITSTRING extends ASN1Object<byte[]> {
     }
     
     /**
+     * BITSTRING
      * 
-     * @param c
-     * @param tag
-     * @param d 
+     * @param c ASN1 class
+     * @param tag ASN1 tag
+     * @param d value
      */
-    BITSTRING(ASN1Cls c, BigInteger tag, byte[] d) {
+    public BITSTRING(ASN1Cls c, BigInteger tag, byte[] d) {
         super(c, tag);
         data = d;
         bitlen = d.length * 8;
     }
-    
+
+    /**
+     * BITSTRING
+     * 
+     * @param c ASN1 class
+     * @param tag ASN1 tag
+     * @param d value 
+     */
+    public BITSTRING(ASN1Cls c, int tag, byte[] d) {
+        super(c, BigInteger.valueOf(tag));
+        data = d;
+        bitlen = d.length * 8;
+    }
+
     /**
      * IMPLICIT BITSTRING
      * @param tag CONTEXT_SPECIFIC tag
@@ -83,13 +95,18 @@ public class BITSTRING extends ASN1Object<byte[]> {
     public BITSTRING(BigInteger tag, byte[] d) {
         this(ASN1Cls.CONTEXT_SPECIFIC, tag, d);
     }
-    
+
+    /**
+     * IMPLICIT BITSTRING
+     * @param tag CONTEXT_SPECIFIC tag
+     * @param d value
+     */
     public BITSTRING(int tag, byte[] d) {
         this(BigInteger.valueOf(tag), d);
     }
     
     /**
-     * 
+     * BITSTRING
      * @param bs little endian bit stream
      */
     public BITSTRING(BitSet bs) {
@@ -161,9 +178,9 @@ public class BITSTRING extends ASN1Object<byte[]> {
         try {
             return "BIT STRING len:" + data.length + " " + ASN1Util.toASN1List(data);
         } catch (UnsupportedOperationException e) {
-            
+        } catch (IllegalStateException e) {
         } catch (IOException ex) {
-            Logger.getLogger(BITSTRING.class.getName()).log(Level.SEVERE, null, ex);
+            throw new IllegalStateException(ex);
         }
         BASE64 b64 = new BASE64();
         return "BIT STRING " + b64.encode(data);

@@ -15,7 +15,6 @@
  */
 package net.siisise.iso.asn1;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -25,8 +24,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import net.siisise.bind.Rebind;
 import net.siisise.block.ReadableBlock;
 import net.siisise.io.Input;
+import net.siisise.iso.asn1.tag.ASN1Convert;
 import net.siisise.xml.TrXML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -49,7 +50,7 @@ public class ASN1Util {
     }
 
     /**
-     * BER
+     * BER Decode.
      * @param block
      * @return 
      */
@@ -80,7 +81,7 @@ public class ASN1Util {
      * ASN1 → XMLObj
      * XER ではない
      *
-     * @param top
+     * @param top ASN1など
      * @return ASN.1 Original XML format.
      */
     public static Document toXML(ASN1Tag top) {
@@ -183,6 +184,12 @@ public class ASN1Util {
         return root;
     }
 
+    /**
+     * BER.
+     * @param in
+     * @return
+     * @throws IOException 
+     */
     public static List<ASN1Tag> toASN1List(InputStream in) throws IOException {
         List<ASN1Tag> asnobjs = new ArrayList<>();
         ReadableBlock rb = ReadableBlock.wrap(in);
@@ -195,11 +202,22 @@ public class ASN1Util {
     }
 
     public static List<ASN1Tag> toASN1List(byte[] src) throws IOException {
-        ByteArrayInputStream in = new ByteArrayInputStream(src);
-        List<ASN1Tag> ao;
-        ao = toASN1List(in);
-        in.close();
+        List<ASN1Tag> ao = new ArrayList<>();
+        ReadableBlock rb = ReadableBlock.wrap(src);
+        while (rb.length() > 0) {
+            ao.add(toASN1(rb));
+        }
         return ao;
+    }
+    
+    /**
+     * 適当に変換.
+     * 
+     * @param obj 基本的なObjectいろいろ
+     * @return ASN.1 tag
+     */
+    public static ASN1Tag toASN1(Object obj) {
+        return Rebind.valueOf(obj, new ASN1Convert());
     }
 
 }
