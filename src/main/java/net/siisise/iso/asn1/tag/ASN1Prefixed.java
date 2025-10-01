@@ -37,7 +37,7 @@ import org.w3c.dom.Element;
  * EXPLICIT の場合限定
  * tag を key としても重複して持ち
  * data を value として保持
- * @param <T>
+ * @param <T> 対応タグ
  */
 public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
     
@@ -49,15 +49,15 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
 
     /**
      * EXPLICIT.
-     * @param cls
-     * @param tag 
+     * @param cls ASN.1 Class
+     * @param tag tag 番号
      */
     public ASN1Prefixed(ASN1Cls cls, BigInteger tag) {
         super(cls, tag);
     }
 
     /**
-     * 
+     * とりあえずEXPLICIT.
      * @param cls ASN.1 class
      * @param tag tag 番号
      * @param asn 中身
@@ -70,7 +70,7 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
 
     /**
      * 名前をつけないと CONTEXT-SPECIFIC [1]
-     * @param tag 
+     * @param tag tag 番号
      */
     public ASN1Prefixed(BigInteger tag) {
         this(ASN1Cls.CONTEXT_SPECIFIC, tag);
@@ -108,7 +108,8 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
 
     /**
      * DER本体符号化.
-     * @return
+     * implicit は未対応
+     * @return DER
      */
     @Override
     public byte[] encodeBody() {
@@ -122,8 +123,8 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
 
     /**
      * EXPLICIT
-     * @param data
-     * @param length 
+     * @param data 素DATA入力
+     * @param length DATA長
      */
     @Override
     public void decodeBody(Input data, int length) {
@@ -142,7 +143,7 @@ public class ASN1Prefixed<T extends ASN1Tag> extends ASN1StructMap<T> {
      * 変換.
      * @param <V> 出力型
      * @param format 変換器
-     * @return 
+     * @return formatで指定した出力
      */
     @Override
     public <V> V rebind(TypeFormat<V> format) {

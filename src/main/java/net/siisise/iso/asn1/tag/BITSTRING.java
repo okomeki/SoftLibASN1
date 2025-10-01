@@ -171,7 +171,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
     /**
      * TODO: bit
      *
-     * @return
+     * @return 参考情報
      */
     @Override
     public String toString() {
@@ -188,7 +188,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
 
     /**
      * 未使用ビット数を考慮しない
-     * @return 
+     * @return 内容
      */
     @Override
     public byte[] getValue() {
@@ -197,7 +197,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
 
     /**
      * BitSetはLittle Endian なのでbit反転する.
-     * @param bs 
+     * @param bs ビット列
      */
     public void set(BitSet bs) {
         int len = bs.length();
@@ -211,7 +211,7 @@ public class BITSTRING extends ASN1Object<byte[]> {
 
     /**
      * ビット順を反転して格納するので注意.
-     * @param lp 
+     * @param lp ビット列
      */
     public void set(LittleBitPacket lp) {
         long len = lp.bitLength();
@@ -237,7 +237,8 @@ public class BITSTRING extends ASN1Object<byte[]> {
 
     /**
      * 未使用ビット数を考慮しない
-     * @param val */
+     * @param val 仮
+     */
     @Override
     public void setValue( byte[] val ) {
         data = val;

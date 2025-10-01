@@ -52,7 +52,7 @@ public class BOOLEAN extends ASN1Object<Boolean> {
 
     /**
      * バイト列デコード.
-     * @param data 
+     * @param data 1バイト, 0 または 0以外
      */
     @Override
     public void decodeBody( byte[] data ) {
@@ -69,6 +69,12 @@ public class BOOLEAN extends ASN1Object<Boolean> {
         return bool;
     }
 
+    /**
+     * 型変換出力.
+     * @param <T> 出力型
+     * @param f 出力形式
+     * @return 変換データ
+     */
     @Override
     public <T> T rebind(TypeFormat<T> f) {
         return f.booleanFormat(val);
@@ -86,8 +92,9 @@ public class BOOLEAN extends ASN1Object<Boolean> {
 
     /**
      * 値の取得.
+     * class なので Boolean型
      * Boolean class
-     * @return 
+     * @return true または false
      */
     @Override
     public Boolean getValue() {
