@@ -22,9 +22,10 @@ import java.util.Arrays;
 import net.siisise.io.Input;
 
 /**
+ * ASN.1 OBJECT.
  * アクセサ略
  *
- * @param <T>
+ * @param <T> 内容型
  */
 public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
@@ -39,7 +40,7 @@ public abstract class ASN1Object<T> implements ASN1Tag<T> {
 
     /**
      * 拡張
-     * @param cls 種別
+     * @param cls 種別 UNIVERSAL, APPLICATION, CONTEXT_SPECIFIC, PRIVATE
      * @param tag タグ
      */
     protected ASN1Object( byte cls, BigInteger tag ) {

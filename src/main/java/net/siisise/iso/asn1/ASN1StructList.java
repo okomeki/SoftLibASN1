@@ -172,11 +172,10 @@ public class ASN1StructList<T extends ASN1Tag> extends ArrayList<T> implements A
         }
         return null;
     }
-
     
     @Override
-    public ASN1Tag getContextSpecific(String name, int tag, ASN1 universal) {
-        return getContextSpecific(tag, universal);
+    public T get(String name, int index) {
+        return get(index);
     }
 
     /**

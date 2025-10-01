@@ -19,7 +19,7 @@ Java Module System JDK 11用
 <dependency>
     <groupId>net.siisise</groupId>
     <artifactId>softlib-asn1.module</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <type>jar</type>
 </dependency>
 ~~~
@@ -33,6 +33,6 @@ JDK 8用
 </dependency>
 ~~~
 
-リリース版 1.1.0
+リリース版 1.1.1
 
-次版 1.1.1-SNAPSHOT
+次版 1.1.2-SNAPSHOT

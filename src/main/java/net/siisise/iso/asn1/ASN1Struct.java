@@ -58,12 +58,55 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
     }
 
     /**
-     * UNIVERSAL 限定? 同じタグで n番目.
+     * UNIVERSAL 限定 要素の取得.
+     * 同じタグで n番目.
      * @param tag タグ
-     * @param index 
+     * @param index 同タグ中の位置
      * @return 
      */
     public V get(BigInteger tag, int index);
+
+    /**
+     * 要素の取得.
+     * @param name 名
+     * @param index 全体の位置
+     * @return 値
+     */
+    public V get(String name, int index);
+    
+    /**
+     * 元要素の型で返る
+     * @param c Universal以外の型
+     * @param tag タグ番号
+     * @return 謎型
+     */
+    public default ASN1Tag get(ASN1Cls c, BigInteger tag) {
+        int size = size();
+        for (int i = 0; i < size; i++ ) {
+            ASN1Tag t = get(i);
+            if (t.getASN1Cls() == c && t.getTag().equals(tag)) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public default ASN1Tag get(ASN1Cls c, BigInteger tag, ASN1 universal) {
+        ASN1Tag org = get(c, tag);
+        // 複製
+        return convert(org, universal);
+    }
+    
+    /*
+     * Universal
+     * 
+     * @param name
+     * @param tag
+     * @return 
+     */
+//    public default ASN1Tag get(String name, ASN1 tag) {
+//        return get(ASN1Cls.UNIVERSAL, tag.tag);
+//    }
 
     /**
      * Context-Specific は番号で取得するとよい.
@@ -72,16 +115,33 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
      * @return 存在しない場合はnull
      */
     public default ASN1Tag getContextSpecific(int tag) {
-        int size = size();
-        for ( int i = 0; i < size; i++ ) {
-            ASN1Tag t = get(i);
-            if ( t.getASN1Cls() == ASN1Cls.CONTEXT_SPECIFIC && t.getId() == tag) {
-                return t;
-            }
-        }
-        return null;
+        return get(ASN1Cls.CONTEXT_SPECIFIC, BigInteger.valueOf(tag));
     }
-    
+
+    public default ASN1Tag getApplication(int tag) {
+        return get(ASN1Cls.APPLICATION, BigInteger.valueOf(tag));
+    }
+
+    public default ASN1Tag getPrivate(int tag) {
+        return get(ASN1Cls.PRIVATE, BigInteger.valueOf(tag));
+    }
+
+    public default ASN1Tag get(ASN1Cls c, String name, int tag) {
+        return get(c, BigInteger.valueOf(tag));
+    }
+
+    public default ASN1Tag getContextSpecific(String name, int tag) {
+        return get(ASN1Cls.CONTEXT_SPECIFIC, name, tag);
+    }
+
+    public default ASN1Tag getApplication(String name, int tag) {
+        return get(ASN1Cls.APPLICATION, name, tag);
+    }
+
+    public default ASN1Tag getPrivate(String name, int tag) {
+        return get(ASN1Cls.PRIVATE, name, tag);
+    }
+
     /**
      * ContextSpecific IMPLICIT からの復元
      * @param tag
@@ -89,9 +149,41 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
      * @return
      */
     public default ASN1Tag getContextSpecific(int tag, ASN1 universal) {
-        ASN1Tag org = getContextSpecific(tag);
-        // 複製
-        return convert(org, universal);
+        return get(ASN1Cls.CONTEXT_SPECIFIC, BigInteger.valueOf(tag), universal);
+    }
+
+    public default ASN1Tag getApplication(int tag, ASN1 universal) {
+        return get(ASN1Cls.APPLICATION, BigInteger.valueOf(tag), universal);
+    }
+
+    public default ASN1Tag getPrivate(int tag, ASN1 universal) {
+        return get(ASN1Cls.PRIVATE, BigInteger.valueOf(tag), universal);
+    }
+
+    /**
+     * 名前またはtagで取得.
+     * BER CER DER などはタグを使用する.
+     * JER などタグがない環境から変換された場合は名前を使用する。
+     * @param c class
+     * @param name パラメータ名 JERなど用
+     * @param tag Context-Specific タグ DER用
+     * @param universal IMPLICITの型変換
+     * @return 
+     */
+    public default ASN1Tag get(ASN1Cls c, String name, int tag, ASN1 universal) {
+        return get(c, BigInteger.valueOf(tag), universal);
+    }
+
+    public default ASN1Tag getContextSpecific(String name, int tag, ASN1 universal) {
+        return get(ASN1Cls.CONTEXT_SPECIFIC, name, tag, universal);
+    }
+
+    public default ASN1Tag getApplication(String name, int tag, ASN1 universal) {
+        return get(ASN1Cls.APPLICATION, name, tag, universal);
+    }
+
+    public default ASN1Tag getPrivate(String name, int tag, ASN1 universal) {
+        return get(ASN1Cls.PRIVATE, name, tag, universal);
     }
 
     /**
@@ -116,18 +208,6 @@ public interface ASN1Struct<V extends ASN1Tag> extends ASN1Tag<List<V>> {
             throw new IllegalStateException(ex);
         }
     }
-
-    /**
-     * 名前またはtagで取得.
-     * BER CER DER などはタグを使用する.
-     * JER などタグがない環境から変換された場合は名前を使用する。
-     * @param name パラメータ名 JERなど用
-     * @param tag Context-Specific タグ DER用
-     * @param universal IMPLICITの型変換
-     * @return 
-     */
-    public ASN1Tag getContextSpecific(String name, int tag, ASN1 universal);
-//    public ASN1Tag getPrivate(int );
     
     /**
      * オブジェクトを奥深くに追加/更新する.

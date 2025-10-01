@@ -29,9 +29,10 @@ import net.siisise.iso.asn1.ASN1Tag;
 public class CHOICE<T extends ASN1Tag> extends SEQUENCEMap<T> {
 
     /**
-     * 
-     * @param name
-     * @param val 
+     * 書き.
+     * 他の選択があれば削除する.
+     * @param name 名前
+     * @param val 値
      */
     public void put(Object name, T val) {
         clear();
@@ -39,10 +40,11 @@ public class CHOICE<T extends ASN1Tag> extends SEQUENCEMap<T> {
     }
 
     /**
-     *
-     * @param <V>
-     * @param format
-     * @return
+     * 読み.
+     * 仮.
+     * @param <V> 型情報
+     * @param format 出力形式
+     * @return 出力
      */
     @Override
     public <V> V rebind(TypeFormat<V> format) {

@@ -185,10 +185,12 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
         return toContextMap().get(exId);
     }
 
+    @Override
     public T getApplication(int exId) {
         return toApplicationMap().get(exId);
     }
 
+    @Override
     public T getPrivate(int exId) {
         return toPrivateMap().get(exId);
     }
@@ -281,6 +283,30 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
     }
 
     /**
+     * 名前とindexの併用取得.
+     * @param name 名前
+     * @param index 全体の位置
+     * @return 
+     */
+    @Override
+    public T get(String name, int index) {
+        T o = get(name);
+        if ( o == null ) {
+            return get(index);
+        }
+        return o;
+    }
+
+    @Override
+    public ASN1Tag get(ASN1Cls c, String name, int tag) {
+        ASN1Tag val = get(c, BigInteger.valueOf(tag));
+        if (val == null) {
+            return get(name);
+        }
+        return val;
+    }
+
+    /**
      * IMPLICITの型変換つきで取得するなにか.
      * 
      * @param name module上の名前 (BER/CER/DER以外の参照方法)
@@ -289,8 +315,8 @@ public class ASN1StructMap<T extends ASN1Tag> extends LinkedHashMap<String,T> im
      * @return 対象
      */
     @Override
-    public ASN1Tag getContextSpecific(String name, int tag, ASN1 universal) {
-        ASN1Tag val = getContextSpecific(tag, universal);
+    public ASN1Tag get(ASN1Cls c, String name, int tag, ASN1 universal) {
+        ASN1Tag val = get(c, BigInteger.valueOf(tag), universal);
         if (val == null) {
             return convert(get(name), universal);
         }
